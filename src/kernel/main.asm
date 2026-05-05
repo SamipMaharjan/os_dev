@@ -1,10 +1,17 @@
-org 0x7C00
+org 0x0000
 bits 16
 
 %define ENDL 0x0D, 0x0A
 
 start: 
-  jmp main
+    ;print message 
+    mov si, msg_hello
+    call puts
+
+
+.halt: 
+    cli
+    hlt
 
 ; Prints a string to the screen
 ; Params:
@@ -22,7 +29,7 @@ puts:
   
   ; OR destination, source performs an or operation in source and destination and stores the result in destination
   ; if operating OR on itself then it modifies the zero flag register if the result is zero/false
-  or al, al ; verify if the next har is null or not
+  or al, al ; verify if the next char is null or not
   jz .done
 
   mov ah, 0x0e ; call bios interrupt
@@ -36,26 +43,7 @@ puts:
   pop si
   ret
 
-main:
-    mov ax, 0   ; cant write to ds/es directly. Stack segments should be loaded from general registers
-    mov ds, ax
-    mov es, ax
 
-    ;setup stack
-    mov ss, ax
-    mov sp, 0x7C00  ; stack grows downward from where we have loaded it in memory.
-
-    ;print message 
-    mov si, msg_hello
-    call puts
-
-    hlt
-
-.halt: 
-    jmp .halt
-
-msg_hello: db 'Hello world!', ENDL, 0
+msg_hello: db 'Hello world! from kernel', ENDL, 0
 ; $ - start of the current line
 ; $$ - start of the current section i.e. 0x7C00
-times 510-($-$$) db 0 ; times is like loop in assembly
-dw 0AA55h
