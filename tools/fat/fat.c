@@ -144,9 +144,11 @@ boolean readFile(DirectoryEntry *fileEntry, FILE *disk, uint8_t *outputBuffer) {
     // the formula ( N * 3 ) / 2 to:
     // 1. goto the entry if the index of the entry is even number.
     // ------------------------OR--------------------------
-    // 2. goto the address that contains half of two entries.
-    // Then depending on the type of entry we apply the below if conditions to
-    // get the full entry.
+    // 2. goto the address that contains half of two entries if the entry is odd
+    // number.
+    //
+    // Then depending on the type of entry we apply the below if
+    // conditions to get the full entry.
     uint32_t fatIndex = currentCluster * 3 / 2;
     if (currentCluster % 2 == 0)
       // the even entry. So only taking the lower 12 bits and setting upper 4
