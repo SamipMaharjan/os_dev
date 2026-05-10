@@ -1,13 +1,13 @@
-bits 16                     # compile this for 16 bit real mode
+bits 16                     ; compile this for 16 bit real mode
 
-section _ENTRY class=CODE   # Everything below this belongs to _ENTRY section of class CODE. 
-                            # Until it reaches another section directve
+section _ENTRY class=CODE   ; Everything below this belongs to _ENTRY section of class CODE. 
+                            ; Until it reaches another section directve
 
-extern _cstart_             # Directive for declaring external function/label/vairables 
-                            # used by linker when linking.
+extern _cstart_             ; Directive for declaring external function/label/vairables 
+                            ; used by linker when linking.
                             
-global entry                # Exports the label so other files can access it. 
-                            # Without it a label is local to a file.
+global entry                ; Exports the label so other files can access it. 
+                            ; Without it a label is local to a file.
 
 ; using a small memory model so stack and data segments should be the same.
 entry: 
