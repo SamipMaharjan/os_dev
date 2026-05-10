@@ -1,12 +1,14 @@
+# PRODUCE A RAW FLAT BINARY NOT ELF OR EXE. So no headers are in the final binary.
+# And will contain pure machine code.
 FORMAT RAW BIN
-OPTION QUIET, 
-        NODEFAULTLIBS,
-        START=entry,
-        VERBOSE,
-        OFFSET=0,
-        STACK=0x200
+OPTION QUIET,                   # Supress linker output
+        NODEFAULTLIBS,          # No auto linking default C libraries
+        START=entry,            # Begin program execution at `entry`
+        VERBOSE,                # Detailed linker info for debugging
+        OFFSET=0,               # Like org directive, use either one but not both. 
+        STACK=0x200             # Sets 0x200 bytes aside for stack relative to offset. Is only used if stack overflow is enaled
 ORDER
     CLNAME CODE
-        SEGMENT _ENTRY
-        SEGMENT _TEXT
-    CLNAME DATA
+        SEGMENT _ENTRY          # Force entry segment first so start up code is at the start of binary
+        SEGMENT _TEXT           # Normal code segment after the entry segment
+    CLNAME DATA                 # Data segment after that

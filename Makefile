@@ -1,16 +1,17 @@
 ASM=nasm
-CC=gcc
-CC16=/opt/watcom/binl/wcc
-LD16=/opt/watcom/binl/wlink
+CC=gcc                              
+CC16=/opt/watcom/binl/wcc           # open-watcom for 16 bit bare metal cross compilation
+LD16=/opt/watcom/binl/wlink         # open-watcom for linking the object files.
 
+# Directories
 SRC_DIR=src
 TOOLS_DIR=tools
 BUILD_DIR=build
 
 
 # initizlized phony targets phony targets are always executed even if: 
-# 1. there is a filed named exactly like the target
-# 2. even if the file is already ready/exists. 
+# 1. even if the file is already ready/exists. 
+# 2. For creating rules without target file.
 .PHONY: all floppy_image kernel bootloader clean always tools_fat
 
 all: floppy_image tools_fat 
@@ -61,7 +62,6 @@ $(BUILD_DIR)/stage2.bin: always
 # Kernel
 #
 kernel: $(BUILD_DIR)/kernel.bin
-
 
 $(BUILD_DIR)/kernel.bin: always
 	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR))

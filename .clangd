@@ -1,0 +1,5 @@
+CompileFlags:
+  Add:
+    - -m16
+    - -ffreestanding
+    - -D_cdecl=__attribute__((cdecl))
