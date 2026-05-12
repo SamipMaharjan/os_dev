@@ -14,7 +14,7 @@ LD16?=/opt/watcom/binl/wlink
 #  -ms: Small memory model
 #  -zl: Emit default library names in the object file to void standard C libraries. 
 #  -zq: Quiet mode to supress informational messages
-CFLAGS16?=-4 -d3 -s -wx -ms -zl -zq
+CFLAGS16?=-4 -d3 -s -wx -ms -zl -zq -za99
 
 # Filenames seperated by spaces
 SOURCES_C=$(wildcard *.c)

@@ -1,5 +1,10 @@
 CompileFlags:
   Add:
+    - "-xc"
     - -m16
+    - "-std=c11"
     - -ffreestanding
     - -D_cdecl=__attribute__((cdecl))
+    - "-Dfar="
+    - "-Dnear="
+    - "-Dhuge="
