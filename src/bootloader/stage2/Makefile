@@ -1,3 +1,7 @@
+# DOCUMENTATION TO HOW STAGE2 WORKS
+# STAGE2 consists of object files from both C and assembly. 
+# ALl the object files are linked to a single binary with help of this makefile and the linker.lnk file
+
 BUILD_DIR?=build/
 ASM?=nasm
 ASMFLAGS?=-f obj

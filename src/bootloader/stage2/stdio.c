@@ -36,7 +36,6 @@ void _cdecl printf(const char *fmt, ...) {
 
   int state = PRINTF_STATE_NORMAL;
   int length = PRINTF_LENGTH_DEFAULT;
-
   int radix = 10;
   bool sign = false;
 
@@ -221,7 +220,6 @@ int *printf_number(int *argp, int length, bool sign, int radix) {
     x86_div64_32(number, radix, &number, &rem);
     buffer[pos++] = g_HexChars[rem];
   } while (number > 0);
-
   // add sign
   if (sign && number_sign < 0) {
     buffer[pos++] = '-';

@@ -1,6 +1,7 @@
 #include "disk.h"
+#include "stdio.h"
 #include "x86.h"
-#include <stdint.h>
+// #include <stdint.h>
 
 bool DISK_Initialize(DISK *disk, uint8_t driveNumber) {
   uint8_t driveType;
@@ -32,17 +33,19 @@ void DISK_LBA2CHS(DISK *disk, uint32_t lba, uint16_t *cylindersOut,
 }
 
 bool DISK_ReadSectors(DISK *disk, uint32_t lba, uint8_t sectors,
-                      uint8_t far *dataOut) {
+                      void far *dataOut) {
   uint16_t cylinder, sector, head;
   DISK_LBA2CHS(disk, lba, &cylinder, &head, &sector);
 
+  // printf("Hello read sectors");
   for (int i = 0; i < 3; i++) {
+    printf("LBA to CHS of disk %d: %d, %d, %d", disk->id, cylinder, head,
+           sector);
     bool ok = x86_Disk_Read(disk->id, cylinder, head, sector, sectors, dataOut);
     if (ok) {
       return true;
     }
-
     ok = x86_Disk_Reset(disk->id);
-    return false;
   }
+  return false;
 }

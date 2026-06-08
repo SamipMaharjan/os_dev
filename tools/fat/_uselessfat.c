@@ -1,13 +1,6 @@
-//
-// All this is to understand how reading disk is don e in fat12 FS.
-//
+#include "stdint.h"
+#include "stdio.h"
 
-#include <ctype.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-//
 typedef uint8_t boolean;
 #define true 1
 #define false 0

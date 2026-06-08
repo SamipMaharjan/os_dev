@@ -16,10 +16,11 @@
 ;    1 - EAX, ECX, EDX are saved by the caller
 ;     - All others saved by callee
 
+%define ENDL 0x0D, 0x0A ; Hex for  \r \n  for putting cursor in newline
+
 bits 16
 
 section _TEXT class=CODE
-
 
 ;
 ;     Name:           U4D                                            
@@ -30,6 +31,7 @@ section _TEXT class=CODE
 ;                     CX;BX   Remainder                              
 ;     Volatile:       none                                           
 ;
+
 global __U4D
 __U4D: 
     shl edx, 16                 ; dx to upper half of edx
@@ -156,7 +158,7 @@ _x86_Disk_Reset:
 
 ;
 ; void _cdecl x86_Disk_Read(uint8_t drive, uint16_t cylinder, uint16_t head,
-;                           uint16_t sector, uint8_t count, uint8_t far *dataOut);
+;                           uint16_t sector, uint8_t count, void  far *dataOut);
 ; INT 13H 02
 ; Input:
 ; AH = 02h
@@ -178,11 +180,16 @@ _x86_Disk_Read:
     push bp                   ; save old call frame
     mov bp, sp                ; initialize new call frame
 
+    ; save modified regs
+    push bx
+    push es
+
     ; setup args
     mov dl, [bp+4]            ; dl - drive
 
     mov ch, [bp+6]            ; ch - cylinder (lower 8 bits)
     mov cl, [bp + 7]          ; cl - cylinder to bits 6-7
+    and cl, 03h          ; mask to just 2 bits
     shl cl, 6
 
     mov dh, [bp+8]            ; dh - head
@@ -193,6 +200,7 @@ _x86_Disk_Read:
 
     mov al, [bp+12]           ; al - count
 
+    xchg bx, bx
     mov bx, [bp + 16]         ; es:bx - far pointer to data output
     mov es, bx
     mov bx, [bp + 14]         ; data out pointer
@@ -205,6 +213,10 @@ _x86_Disk_Read:
     stc 
     int 13h 
 
+    push si 
+    mov si, msg_debug
+    call puts 
+    pop si
 
     ; set return values
     mov ax, 1 
@@ -299,3 +311,32 @@ _x86_Disk_GetDriveParams:
     mov sp, bp
     pop bp
     ret
+
+; Instructions for printing Characters in screen
+puts: 
+  ; save registers we will modify. As a function must not permanently destroy values in register that it will use. 
+  push si 
+  push ax
+
+.loop:
+  lodsb ; loads next character in al
+  
+  ; OR destination, source performs an or operation in source and destination and stores the result in destination
+  ; if operating OR on itself then it modifies the zero flag register if the result is zero/false
+  or al, al ; verify if the next har is null or not
+  jz .done
+
+  mov ah, 0x0e ; call bios interrupt
+  mov bh, 0
+  int 0x10
+
+  jmp .loop
+
+.done: 
+  pop ax
+  pop si
+  ret
+
+
+
+msg_debug: db 'DEBUG ASM', ENDL, 0

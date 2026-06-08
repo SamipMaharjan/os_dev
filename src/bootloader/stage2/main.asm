@@ -1,11 +1,10 @@
-bits 16                     ; compile this for 16 bit real mode
+; Sets up stack segment and base pointer before calling the _cstart_ function
 
+bits 16                     ; compile this for 16 bit real mode
 section _ENTRY class=CODE   ; Everything below this belongs to _ENTRY section of class CODE. 
                             ; Until it reaches another section directve
-
 extern _cstart_             ; Directive for declaring external function/label/vairables 
                             ; used by linker when linking.
-                            
 global entry                ; Exports the label so other files can access it. 
                             ; Without it a label is local to a file.
 

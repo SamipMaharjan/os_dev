@@ -1,3 +1,17 @@
+; This is the stage 1 of the bootloader. 
+; The binary from this asm file will be copied to first sector of FAT image
+; Here are the things this block of instructions does: 
+; - Defines the Bios Parameter Block so that BIOS knows its dealing with FAT12 
+; - Reads drive parameters (Max CHS values) using 13h 8h and stores it.
+; - Computes Logical Block Address of root directory. 
+; - Computes the size of root_directory. 
+; - Reads entire rootdirectory entry to memory. Uses 13h 02h, and disk_read routine.
+; - Iterates over the entries for "STAGE2  BIN" entry. Using "repe cmpsb" instruction.
+; - Loads the File Allocation Table in memory, overwriting the rootdir entries. 
+; - Loads the data of first cluster of STAGE2 BIN at STAGE2's segment:offset
+; - Uses FAT and cluster numbers to load all data of STAGE2.BIN at its segment:offset
+; - Jumps to STAGE2_LOAD_SEGMENT:STAGE2_LOAD_OFFSET to run stage 2.
+
 org 0x7C00              ; org directive for telling assembler where the binary will be loaded in memory
 bits 16                 ; bits directive for telling assembler the type of CPU we are assembling this into
 
@@ -109,7 +123,7 @@ start:
                                     ; which means we have a sector only partially filled with entries
 
 .root_dir_after:
-  mov cl, al                  ; cl = num of secors to read / size of root dir that was computed and saved in ax.
+  mov cl, al                  ; cl = num of secors to read || size of root dir that was computed and saved in ax.
   pop ax                      ; ax = LBA of root directory saved previously
   mov dl, [ebr_drive_number]  ; dl = drive number saved previously || defines drive type.
   mov bx, buffer              ; ES:BX = Address of memory buffer to write the disk data. Used by 13h 02h
@@ -123,7 +137,6 @@ start:
 .search_stage2:                     ; marks the beginning of the loop.
   mov si, file_stage2_bin           
   mov cx, 11                        ; used to indicate charaters to compare by repe instruction 
-  push di
 
   ; REPE: repeats a string instruction while operands are equal (zero flag = 1), 
   ; or until cx reaches 0 
@@ -133,6 +146,7 @@ start:
   ; So the below instruction compares every character in file_stage2_bin 
   ; against the first 11 bytes in address contained by the ES:DI register.
   ; I.E the start of root directory which contains the first entry's file name 
+  push di
   repe cmpsb                        
   pop di                             
 
@@ -166,24 +180,22 @@ start:
   ; SECTION:  read stage2 and process FAT chain
   mov bx, STAGE2_LOAD_SEGMENT
   mov es, bx
-  mov bx, STAGE2_LOAD_OFFSET
-  ; Copies disk contents to ES:BX. Used by 13h 02h
-
+  mov bx, STAGE2_LOAD_OFFSET ; ES:BX used by 13h 02h
+  
 .local_stage2_loop: 
   ; Read next cluster
   mov ax, [stage2_cluster]
   add ax, 31                                          ; LBA used by 13h 02h
                                                       ; first cluster = (stage2_cluster -2) * sectors_per_cluster + start_sector
                                                       ; start sector = reseved + fats + root dir size = 1 + 1 * 18 + 14 = 33
-                                                      ; first_cluster = 2-2 * 1 + 33 = 33
+                                                      ; first_cluster = stage2_cluster-2 * 1 + 33 = stage2_cluster + 31
                                                       ; (x-2)*1+33 = x+31
 
-  mov cl, 1                             ; No of sectors to read used by 13h 02h 
+  mov cl, 1                             ; No of sectors to read used by 13h 02h ; improve: make it sectors_per_cluster
   mov dl, [ebr_drive_number]            ; Drive number used by 13h 02h
   call disk_read                        ; Reading cluster into STAGE2_LOAD_SEGMENT:STAGE2_LOAD_OFFSET
-   
 
-  add bx, [bpb_bytes_per_sector]        ; Adding the read destination address by 1 sector / 512 bytes
+  add bx, [bpb_bytes_per_sector]        ; Adding the read destination address by 1 sector / 512 bytes; improve: make it bytes_per_sector * sectors_per_cluster
 
   ; compute location of next cluster
   mov ax, [stage2_cluster]               
@@ -192,7 +204,6 @@ start:
   mov cx, 2                              
   div cx                                ; ax = (cluster * 3)/2
                                         ; ax = byte index ( with respect to FAT sector ) containing the FAT entry, dx = (cluster * 3) % 2
-
   mov si, buffer                        
   add si, ax                            ; buffer = FAT, ax = byte index containg the FAT entry
   mov ax, [ds:si]                       ; read 2 bytes from FAT+byte_index at index AX.
@@ -209,7 +220,7 @@ start:
 
 .next_cluster_after: 
   cmp ax, 0xFF8                         ; If end of chain
-  jae .read_finish                      ; Jump to .read_finish
+  jae .read_finish                      ; Jump if ax is above or equal 0xFF8 uses CF register. 
 
   mov [stage2_cluster], ax              ; If not the end of chain then update the cluster. 
   jmp .local_stage2_loop                ; And jump to start of loop
@@ -220,7 +231,7 @@ start:
   mov dl, [ebr_drive_number]; boot device in dl
 
 
-  ; set segment registers
+  ; setup segment registers for stage2
   mov ax, STAGE2_LOAD_SEGMENT 
   mov ds, ax
   mov es, ax
@@ -231,8 +242,6 @@ start:
 
   cli
   hlt
-
-  
 
 floppy_error: 
   mov si, msg_read_failed
@@ -297,7 +306,6 @@ puts:
 ;   - cx [bits 0-5]: sector number
 ;   - cx [bits 6-15]: cylinder
 ;   - dh: head
-;
 lba_to_chs:
   push ax
   push dx
@@ -325,19 +333,16 @@ lba_to_chs:
                                     ; Bits 8 to 15 = Lower bits of max cylinder no (CH register)
 
   pop ax                            ; popping value of DX in AX to get DL
-  mov dl, al                        ; restore DL 
+  mov dl, al                        ; restore DL which contains drive number 
   pop ax                            ; restore AX
   ret
 
-
-; 
-; Reads sectors form a  disk
+; Reads sectors form a  disk using 13h 02h
 ; Parameters: 
 ;   -ax: LBA address
 ;   -cl: number of sectors to read (up to 128)
 ;   -dl: drive number
 ;   -es:bx : memory address wher eto store read data
-; 
 disk_read:
   push ax                   
   push bx                  
@@ -346,7 +351,7 @@ disk_read:
   push di
 
   push cx                           ; save CL which contains no. of sectors to read 
-  call lba_to_chs                   ; compute CHS, CX = max no of sectors and cylinders, DH = no of heads
+  call lba_to_chs                   ; compute CHS, returns CX = max no of sectors and cylinders, DH = no of heads
   pop ax                            ; RESTORE CL to AL ,so AL = number of sectors to read 
 
   mov ah, 02h                       ; argument for int 13h to read sectors 
@@ -355,7 +360,7 @@ disk_read:
 .retry: 
   pusha                             ; save all register, we dont know what bios modifies
   stc                               ; set carry flag to 1, some BIOS'es dont set it
-  int 13h                           ; carry flag cleared = success
+  int 13h                           ; carry flag cleared = success 
   jnc .done                         ; jump if carry flag is not  zero, meaning if the disk read was successful.
 
   ; read failed
