@@ -22,7 +22,7 @@ bits 16
 
 section _TEXT class=CODE
 
-;
+;     Division for unsigned integers. Both dividend and divisor need to be unsigned.
 ;     Name:           U4D                                            
 ;     Operation:      Unsigned 4 byte divide                         
 ;     Inputs:         DX;AX   Dividend                               
