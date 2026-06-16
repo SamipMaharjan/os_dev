@@ -5,3 +5,4 @@
 void putc(char c);
 void puts(const char *str);
 void _cdecl printf(const char *fmt, ...);
+void printRawBytes(const char *buffer, int no_of_bytes);

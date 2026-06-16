@@ -1,0 +1,14 @@
+fat.c(82): Warning! W303: Parameter 'bs' has been defined, but not referenced
+fat.c(120): Warning! W112: Parameter 1: Pointer truncated
+fat.c(120): Note! I2003: source conversion type is 'FAT_BootSector __far *'
+fat.c(120): Note! I2004: target conversion type is 'FAT_BootSector *'
+fat.c(120): Note! I2002: 'print_for_debug' defined in: fat.c(82)
+fat.c(277): Warning! W131: No prototype found for function 'memcpy'
+fat.c(269): Warning! W202: Symbol 'current' has been defined, but not referenced
+fat.c(260): Warning! W303: Parameter 'disk' has been defined, but not referenced
+fat.c(268): Warning! W202: Symbol 'parent' has been defined, but not referenced
+fat.c(306): Warning! W107: Missing return value for function 'FAT_Open'
+fat.c(277): Warning! W308: The function 'memcpy' without prototyped parameters called
+fat.c(277): Note! I2002: 'memcpy' defined in: fat.c(277)
+fat.c(282): Warning! W308: The function 'memcpy' without prototyped parameters called
+fat.c(282): Note! I2002: 'memcpy' defined in: fat.c(277)

@@ -9,9 +9,11 @@ bool DISK_Initialize(DISK *disk, uint8_t driveNumber) {
 
   disk->id = driveNumber;
 
+  printf("hell ofron DISK_Initialize");
   if (!x86_Disk_GetDriveParams(disk->id, &driveType, &cylinders, &sectors,
-                               &heads))
+                               &heads)) {
     return false;
+  }
 
   disk->id = driveNumber;
   disk->cylinders = cylinders;

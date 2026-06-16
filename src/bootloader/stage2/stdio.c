@@ -1,5 +1,6 @@
 #include "stdio.h"
 #include "x86.h"
+#include <stdint.h>
 
 int *printf_number(int *argp, int length, bool sign, int radix);
 
@@ -126,6 +127,7 @@ void _cdecl printf(const char *fmt, ...) {
         radix = 16;
         sign = false;
         argp = printf_number(argp, length, sign, radix);
+        break;
 
       // Print octal
       case 'o':
@@ -230,4 +232,15 @@ int *printf_number(int *argp, int length, bool sign, int radix) {
     putc(buffer[pos]);
 
   return argp;
+}
+
+void printRawBytes(const char *buffer, int no_of_bytes) {
+  int current_byte = 1;
+
+  while (current_byte <= no_of_bytes) {
+    putc(*buffer);
+    // printf("%c", *buffer);
+    buffer++;
+    current_byte++;
+  }
 }

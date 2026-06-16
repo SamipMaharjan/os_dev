@@ -175,6 +175,7 @@ start:
   mov bx, buffer                      ; Address to copy disk bytes. Used by 13h 02h
   mov cl, [bpb_sectors_per_fat]       ; Number of sectors to read. Used by 13h 02h
   mov dl, [ebr_drive_number]          ; Drive number used by 13h 02h
+
   call disk_read
 
   ; SECTION:  read stage2 and process FAT chain
@@ -193,6 +194,7 @@ start:
 
   mov cl, 1                             ; No of sectors to read used by 13h 02h ; improve: make it sectors_per_cluster
   mov dl, [ebr_drive_number]            ; Drive number used by 13h 02h
+
   call disk_read                        ; Reading cluster into STAGE2_LOAD_SEGMENT:STAGE2_LOAD_OFFSET
 
   add bx, [bpb_bytes_per_sector]        ; Adding the read destination address by 1 sector / 512 bytes; improve: make it bytes_per_sector * sectors_per_cluster
