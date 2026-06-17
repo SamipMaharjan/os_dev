@@ -37,6 +37,8 @@ enum FAT_Attributes {
                       FAT_ATTRIBUTE_SYSTEM | FAT_ATTRIBUTE_VOLUME_ID
 };
 
+// Sets up data of Bootsector, FAT, and Rootdirecotry in memory starting at
+// 0x00000500
 bool FAT_Initialize(DISK *disk);
 FAT_File far *FAT_Open(DISK *disk, const char *path);
 uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,

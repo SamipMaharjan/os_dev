@@ -5,6 +5,7 @@
 #include "fat.h"
 #include "disk.h"
 #include "memdefs.h"
+#include "memory.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "string.h"
@@ -79,43 +80,21 @@ boolean FAT_ReadFat(DISK *disk);
 boolean FAT_ReadRootDirectory(DISK *disk);
 uint32_t FAT_ClusterToLba(uint32_t cluster);
 
-void print_for_debug(FAT_BootSector *bs) {
-  // printf("\r\nits probably wrong\r\n");
-  // printf("JUMP INSTRUCTION: %x", ) :
-  printf("\r\n");
-  printf("\r\n");
-  printf("size of fat_data %d  \n\r", sizeof(FAT_Data));
-  printf("pointer locatino of g_Data  %ld,%lx \n\r", (uint32_t far *)g_Data,
-         (uint32_t far *)g_Data);
-  printf("pointer location of g_FAT %lx \n\r", g_Fat);
-  printf("pointer location of gdata.bs.bootsectorbytes %x \n\r",
-         g_Data->BS.BootSectorBytes);
-  printf("pointer location of gdata.bs.bootsectorbytes %x \n\r",
-         &g_Data->BS.BootSector);
-  printf("pointer location of gdata.bs.BootJumpInstruction %x \n\r",
-         &g_Data->BS.BootSector.BootJumpInstruction);
-  printf("pointer location of gdata.bs.OemIdentifier %x \n\r",
-         &g_Data->BS.BootSector.OemIdentifier);
-  printf("pointer location of gdata.bs.BytesPerSector %x \n\r",
-         &g_Data->BS.BootSector.BytesPerSector);
-  printf("pointer location of gdata.bs.SectorsPerCluster %x \n\r",
-         &g_Data->BS.BootSector.SectorsPerCluster);
-  printf("pointer location of gdata.bs.ReservedSectors %x \n\r",
-         &g_Data->BS.BootSector.ReservedSectors);
-  printf("data of gdata.bs.ReservedSectors %x \n\r",
-         g_Data->BS.BootSector.ReservedSectors);
-  printf("data of gdata.bs.SectorsPerFat %x \n\r",
-         g_Data->BS.BootSector.SectorsPerFat);
-  printf("data of gdata.bs.FatCount %x \n\r", g_Data->BS.BootSector.FatCount);
-  printf("\r\n");
-  printf("\r\n");
-}
-
 boolean FAT_ReadBootSector(DISK *disk) {
   // copying the raw bytes in the first sector to g_BootSector pointer.
   // return fread(&g_BootSector, sizeof(g_BootSector), 1, disk) > 0;
   return DISK_ReadSectors(disk, 0, 1, g_Data->BS.BootSectorBytes);
 }
+
+uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
+                  void *dataOut) {
+  // get file data
+}
+
+bool FAT_ReadEntry(DISK *disk, FAT_File far *file,
+                   FAT_DirectoryEntry *dirEntry) {}
+
+void FAT_Close(FAT_File far *file) {}
 
 // Reads: boot sector, FAT, and root directory contents to 0x5000
 // Initializes g_Data, which contains bootsector and RootDirectory, and fat
@@ -136,7 +115,6 @@ bool FAT_Initialize(DISK *disk) {
   // Put the g_Fat pointer right after g_Data pointer.
   // Have to be efficient with 0.5MB memory.
   g_Fat = (uint8_t far *)g_Data + sizeof(FAT_Data);
-  // print_for_debug(&g_Data->BS.BootSector);
 
   uint32_t fatSize = g_Data->BS.BootSector.BytesPerSector *
                      g_Data->BS.BootSector.SectorsPerFat;
@@ -235,39 +213,10 @@ uint32_t FAT_ClusterToLba(uint32_t cluster) {
   return g_DataSectionLba +
          (cluster - 2) * g_Data->BS.BootSector.SectorsPerCluster;
 }
-//
-// bool FAT_FindFile(DISK *disk, FAT_File far *file, const char *name,
-//                   FAT_DirectoryEntry *entryOut) {
-//   char fatName[11];
-//   FAT_DirectoryEntry entry;
-//
-//   // convert from name to fat name. eg "stage2.bin" becomes "STAGE   BIN".
-//   memset(fatName, ' ', sizeof(fatName));
-//
-//   const char *ext = strchr(name, '.');
-//   if (ext == NULL)
-//     ext = name + 11;
-//
-//   for (int i = 0; i < 8 && name[i] && name + i < ext; i++)
-//     fatName[i] = toupper(name[i]);
-//
-//   if (ext != NULL) {
-//     for (int i = 0; i < 3 && ext[i + 1]; i++)
-//       fatName[i + 8] = toupper(ext[i + 1]);
-//   }
-//
-//   while (FAT_ReadEntry(disk, file, &entry)) {
-//     if (memcmp(fatName, entry.Name, 11) == 0) {
-//       *entryOut = entry;
-//       return true;
-//     }
-//   }
-//
-//   return false;
-// }
+bool *FAT_FindFile(FAT_File far *file, const char *name,
+                   FAT_DirectoryEntry *entryOut) {}
 
 FAT_File far *FAT_Open(DISK *disk, const char *path) {
-  printf("FAT_open function");
   char name[MAX_PATH_SIZE];
 
   // ignore leading slash
@@ -295,23 +244,26 @@ FAT_File far *FAT_Open(DISK *disk, const char *path) {
     }
 
     // find directory entry in the current directory
-    // FAT_DirectoryEntry entry;
-    // if (FAT_FindFile(disk, current, name, &entry)) {
-    //   // check if directory
-    //   if (!isLast && (entry.Attributes & FAT_ATTRIBUTE_DIRECTORY) == 0) {
-    //     printf("FAT: %s not a directory \r\n", name);
-    //     return NULL;
-    //   }
-    //
-    //   // open new directory entry
-    //   parent = current;
-    //   current = FAT_OpenEntry(disk, &entry);
-    // } else {
-    //   FAT_Close(parent);
-    //   printf("FAT: %S NOT FOUND \r\n", name);
-    //   return NULL;
-    // }
+    FAT_DirectoryEntry entry;
+    if (FAT_FindFile(current, name, &entry)) {
+
+      // check if directory
+      if (!isLast && (entry.Attributes & FAT_ATTRIBUTE_DIRECTORY) == 0) {
+        printf("FAT: %s is not a directory. \r\n", name);
+        return NULL;
+      }
+
+      // open new directory entry
+      current = FAT_OpenEntry(disk, &entry);
+    } else {
+      FAT_Close(current);
+
+      printf("FAT: %s not found \r\n", name);
+      return NULL;
+    }
   }
+
+  return current;
 }
 // boolean readSectors(FILE *disk, uint32_t lba, uint32_t count, void
 // *bufferOut) {
