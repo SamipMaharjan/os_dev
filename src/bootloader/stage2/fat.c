@@ -88,6 +88,25 @@ void print_for_debug(FAT_BootSector *bs) {
   printf("pointer locatino of g_Data  %ld,%lx \n\r", (uint32_t far *)g_Data,
          (uint32_t far *)g_Data);
   printf("pointer location of g_FAT %lx \n\r", g_Fat);
+  printf("pointer location of gdata.bs.bootsectorbytes %x \n\r",
+         g_Data->BS.BootSectorBytes);
+  printf("pointer location of gdata.bs.bootsectorbytes %x \n\r",
+         &g_Data->BS.BootSector);
+  printf("pointer location of gdata.bs.BootJumpInstruction %x \n\r",
+         &g_Data->BS.BootSector.BootJumpInstruction);
+  printf("pointer location of gdata.bs.OemIdentifier %x \n\r",
+         &g_Data->BS.BootSector.OemIdentifier);
+  printf("pointer location of gdata.bs.BytesPerSector %x \n\r",
+         &g_Data->BS.BootSector.BytesPerSector);
+  printf("pointer location of gdata.bs.SectorsPerCluster %x \n\r",
+         &g_Data->BS.BootSector.SectorsPerCluster);
+  printf("pointer location of gdata.bs.ReservedSectors %x \n\r",
+         &g_Data->BS.BootSector.ReservedSectors);
+  printf("data of gdata.bs.ReservedSectors %x \n\r",
+         g_Data->BS.BootSector.ReservedSectors);
+  printf("data of gdata.bs.SectorsPerFat %x \n\r",
+         g_Data->BS.BootSector.SectorsPerFat);
+  printf("data of gdata.bs.FatCount %x \n\r", g_Data->BS.BootSector.FatCount);
   printf("\r\n");
   printf("\r\n");
 }
@@ -117,7 +136,7 @@ bool FAT_Initialize(DISK *disk) {
   // Put the g_Fat pointer right after g_Data pointer.
   // Have to be efficient with 0.5MB memory.
   g_Fat = (uint8_t far *)g_Data + sizeof(FAT_Data);
-  print_for_debug(&g_Data->BS.BootSector);
+  // print_for_debug(&g_Data->BS.BootSector);
 
   uint32_t fatSize = g_Data->BS.BootSector.BytesPerSector *
                      g_Data->BS.BootSector.SectorsPerFat;
@@ -138,6 +157,7 @@ bool FAT_Initialize(DISK *disk) {
   uint32_t rootDirLba =
       g_Data->BS.BootSector.ReservedSectors +
       g_Data->BS.BootSector.SectorsPerFat * g_Data->BS.BootSector.FatCount;
+
   uint32_t rootDirSize =
       sizeof(FAT_DirectoryEntry) * g_Data->BS.BootSector.DirEntryCount;
 
@@ -155,24 +175,13 @@ bool FAT_Initialize(DISK *disk) {
   g_Data->RootDirectory.CurrentCluster = 0;
   g_Data->RootDirectory.CurrentSectorInCluster = 0;
 
-  printf("pointer location of rootdir buffer %d, %p \n\r",
-         g_Data->RootDirectory.Buffer);
-  printf("root direcotry lba, %d, %d, %d, %d", rootDirLba,
-         g_Data->BS.BootSector.ReservedSectors,
-         g_Data->BS.BootSector.SectorsPerFat, g_Data->BS.BootSector.FatCount);
-
-  // _asm xchg bx, bx;
+  printf("g_Data->RootDirectory.Buffer:%x \r\n", g_Data->RootDirectory.Buffer);
 
   if (!DISK_ReadSectors(disk, rootDirLba, 1, g_Data->RootDirectory.Buffer)) {
     printf("FAT: Read root directory filed");
     return false;
   }
 
-  printf("Raw bytes print g_Fat");
-  printRawBytes((const char *)g_Fat, 512);
-
-  printf("Print root directory");
-  printRawBytes((const char *)&g_Data->RootDirectory.Public.Handle, 4);
   // calculate data section
   uint32_t rootDirSectors =
       (rootDirSize + g_Data->BS.BootSector.BytesPerSector - 1) /

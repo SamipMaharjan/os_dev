@@ -9,7 +9,6 @@ bool DISK_Initialize(DISK *disk, uint8_t driveNumber) {
 
   disk->id = driveNumber;
 
-  printf("hell ofron DISK_Initialize");
   if (!x86_Disk_GetDriveParams(disk->id, &driveType, &cylinders, &sectors,
                                &heads)) {
     return false;
@@ -25,13 +24,13 @@ bool DISK_Initialize(DISK *disk, uint8_t driveNumber) {
 void DISK_LBA2CHS(DISK *disk, uint32_t lba, uint16_t *cylindersOut,
                   uint16_t *headsOut, uint16_t *sectorsOut) {
   // sector = (LBA % sectors per track + 1)
-  *sectorsOut = lba % disk->sectors + 1;
+  *sectorsOut = (lba % disk->sectors) + 1;
 
   // cylinder = (LBA / sectors per track )/ heads
-  *cylindersOut = (lba / disk->sectors) / disk->heads;
+  *cylindersOut = (lba / disk->sectors) / (disk->heads + 1);
 
   // head = (LBA / sectors per track )% heads
-  *headsOut = (lba / disk->sectors) % disk->heads;
+  *headsOut = (lba / disk->sectors) % (disk->heads + 1);
 }
 
 bool DISK_ReadSectors(DISK *disk, uint32_t lba, uint8_t sectors,
@@ -41,8 +40,6 @@ bool DISK_ReadSectors(DISK *disk, uint32_t lba, uint8_t sectors,
 
   // printf("Hello read sectors");
   for (int i = 0; i < 3; i++) {
-    printf("LBA to CHS of disk %d: %d, %d, %d", disk->id, cylinder, head,
-           sector);
     bool ok = x86_Disk_Read(disk->id, cylinder, head, sector, sectors, dataOut);
     if (ok) {
       return true;
