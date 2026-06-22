@@ -1,3 +1,0 @@
-fat.c(298): Warning! W131: No prototype found for function 'toupper'
-fat.c(298): Warning! W308: The function 'toupper' without prototyped parameters called
-fat.c(298): Note! I2002: 'toupper' defined in: fat.c(298)

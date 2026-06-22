@@ -3,6 +3,7 @@
 //
 
 #include "fat.h"
+#include "ctype.h"
 #include "disk.h"
 #include "memdefs.h"
 #include "memory.h"
@@ -300,7 +301,7 @@ bool FAT_FindFile(DISK *disk, FAT_File far *file, const char *name,
 
   if (ext != NULL) {
     for (int i = 0; i < 3 && ext[i]; i++)
-      fatName[i + 8] = ext[i];
+      fatName[i + 8] = toupper(ext[i + 1]);
   }
 
   for (int i = 0; i < 3 && ext[i]; i++)
