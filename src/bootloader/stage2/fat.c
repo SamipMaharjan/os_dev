@@ -10,8 +10,6 @@
 #include "stdio.h"
 #include "string.h"
 #include "utility.h"
-#include <ctype.h>
-#include <string.h>
 
 typedef uint8_t boolean;
 #define true 1
@@ -20,6 +18,9 @@ typedef uint8_t boolean;
 #define MAX_FILE_HANDLES 10
 #define MAX_PATH_SIZE 256
 #define ROOT_DIRECTORY_HANDLE -1
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
 
 #pragma pack(push, 1)
 typedef struct {
@@ -83,10 +84,10 @@ boolean FAT_ReadRootDirectory(DISK *disk);
 uint32_t FAT_ClusterToLba(uint32_t cluster);
 
 uint32_t FAT_NextCluster(uint32_t currentCluster) {
-  uint32_t fatIndex = currentCluster * 3 / 2 if (currentCluster % 2 == 0) {
+  uint32_t fatIndex = currentCluster * 3 / 2;
+  if (currentCluster % 2 == 0) {
     return (*(uint16_t *)(g_Fat + fatIndex)) & 0x0FFF;
-  }
-  else {
+  } else {
     return (*(uint16_t *)(g_Fat + fatIndex)) >> 4;
   }
 }
@@ -321,7 +322,7 @@ FAT_File far *FAT_Open(DISK *disk, const char *path) {
   if (path[0] == '/')
     path++;
 
-  FAT_File far *parent = NULL;
+  // FAT_File far *parent = NULL;
   FAT_File far *current = &g_Data->RootDirectory.Public;
 
   while (*path != '\0') {

@@ -15,8 +15,8 @@ bool DISK_Initialize(DISK *disk, uint8_t driveNumber) {
   }
 
   disk->id = driveNumber;
-  disk->cylinders = cylinders;
-  disk->heads = heads;
+  disk->cylinders = cylinders + 1;
+  disk->heads = heads + 1;
   disk->sectors = sectors;
 
   return true;
@@ -27,10 +27,10 @@ void DISK_LBA2CHS(DISK *disk, uint32_t lba, uint16_t *cylindersOut,
   *sectorsOut = (lba % disk->sectors) + 1;
 
   // cylinder = (LBA / sectors per track )/ heads
-  *cylindersOut = (lba / disk->sectors) / (disk->heads + 1);
+  *cylindersOut = (lba / disk->sectors) / disk->heads;
 
   // head = (LBA / sectors per track )% heads
-  *headsOut = (lba / disk->sectors) % (disk->heads + 1);
+  *headsOut = (lba / disk->sectors) % disk->heads;
 }
 
 bool DISK_ReadSectors(DISK *disk, uint32_t lba, uint8_t sectors,
