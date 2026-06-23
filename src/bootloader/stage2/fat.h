@@ -40,12 +40,25 @@ enum FAT_Attributes {
 // Sets up data of Bootsector, FAT, and Rootdirecotry in memory starting at
 // 0x00000500
 bool FAT_Initialize(DISK *disk);
+
+// Gets the current directory/file from the whole path
+// Calls FAT_FindFile
 FAT_File far *FAT_Open(DISK *disk, const char *path);
-uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
-                  void *dataOut);
-bool FAT_ReadEntry(DISK *disk, FAT_File far *file,
-                   FAT_DirectoryEntry *dirEntry);
-void FAT_Close(FAT_File far *file);
-FAT_File far *FAT_OpenEntry(DISK *disk, FAT_DirectoryEntry *entry);
+
+// Converts the file name to FAT filename format.
+// Calls FAT_ReadEntry
 bool FAT_FindFile(DISK *disk, FAT_File far *file, const char *name,
                   FAT_DirectoryEntry *entryOut);
+
+// Reads a directory entry to *dirEntry pointer
+bool FAT_ReadEntry(DISK *disk, FAT_File far *file,
+                   FAT_DirectoryEntry *dirEntry);
+
+// Used for reading Bytes of FAT file or direcotry entry  from buffer[] array in
+// a safe way
+uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
+                  void *dataOut);
+
+void FAT_Close(FAT_File far *file);
+
+FAT_File far *FAT_OpenEntry(DISK *disk, FAT_DirectoryEntry *entry);

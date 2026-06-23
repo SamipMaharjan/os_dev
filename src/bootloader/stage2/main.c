@@ -44,6 +44,9 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   // browse files in root
   FAT_File far *fd = FAT_Open(&disk, "/");
+  printf("root dir handle: %d %d %lx %ld  \r\n", fd->Handle, fd->IsDirectory,
+         fd->Size, fd->Position);
+
   FAT_DirectoryEntry entry;
   int i = 0;
   while (FAT_ReadEntry(&disk, fd, &entry) && i++ < 5) {

@@ -100,28 +100,42 @@ boolean FAT_ReadBootSector(DISK *disk) {
 
 uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
                   void *dataOut) {
-  // get file data
+  // get file data using handle
   FAT_FileData far *fd = (file->Handle == ROOT_DIRECTORY_HANDLE)
                              ? &g_Data->RootDirectory
                              : &g_Data->OpenedFiles[file->Handle];
 
   uint8_t *u8DataOut = (uint8_t *)dataOut;
+
+  // Total size left to be read
+  // Also prevents reading past a file.
+  // if byteCount exceedes the file size then it wont read past the file.
   byteCount = min(byteCount, fd->Public.Size - fd->Public.Position);
+
   while (byteCount > 0) {
-    // uint32_t left= min(byteCount, fd->Public.Size - fd->Public.Position);
+    // no of data left to read in buffer
+    // so if position = 0; leftInBuffer = 512;
+    // and if position = 1; leftInBuffer = 511;
     uint32_t leftInBuffer = (SECTOR_SIZE - fd->Public.Position % SECTOR_SIZE);
+
+    // if byteCount exceedes the buffer size then it wont read past the current
+    // 512 sized buffer
     uint32_t take = min(byteCount, leftInBuffer);
 
+    // copy 1 sector or less of data from fd->Buffer to u8DataOut
     memcpy(u8DataOut, fd->Buffer + fd->Public.Position % SECTOR_SIZE, take);
     u8DataOut += take;
     fd->Public.Position += take;
     byteCount -= take;
 
-    // See if we need to read more data
+    // If we need to read more data
     if (byteCount > 0) {
-      // Special handling for root directory
+      // Special handling for root directory as FAT_Read is used to read root
+      // directory entry too
       if (fd->Public.Handle == ROOT_DIRECTORY_HANDLE) {
+        // Increment LBA
         ++fd->CurrentCluster;
+        // read the next 512 bytes of root directory to buffer
         if (!DISK_ReadSectors(disk, fd->CurrentCluster, 1, fd->Buffer)) {
           printf("FAT: read error!\r\n");
           break;
@@ -133,6 +147,10 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
           fd->CurrentSectorInCluster = 0;
           fd->CurrentCluster = FAT_NextCluster(fd->CurrentCluster);
         }
+
+        // should never happen
+        // byteCount should not be greater than zero if byteCount is not greater
+        // than remaining size of file or bytes left in buffer
         if (fd->CurrentCluster >= 0xFF8) {
           printf("FAT: read error! invalid next cluster!\r\n");
           break;
@@ -220,6 +238,8 @@ bool FAT_Initialize(DISK *disk) {
   g_Data->RootDirectory.Public.Size =
       sizeof(FAT_DirectoryEntry) * g_Data->BS.BootSector.DirEntryCount;
   g_Data->RootDirectory.Opened = true;
+  // FirstCluster and CurrentCluster are set to LBA only because its root
+  // directory and will not be equal to LBA for sub-directory entries
   g_Data->RootDirectory.FirstCluster = rootDirLba;
   g_Data->RootDirectory.CurrentCluster = rootDirLba;
   g_Data->RootDirectory.CurrentSectorInCluster = 0;
@@ -284,6 +304,7 @@ uint32_t FAT_ClusterToLba(uint32_t cluster) {
   return g_DataSectionLba +
          (cluster - 2) * g_Data->BS.BootSector.SectorsPerCluster;
 }
+
 bool FAT_FindFile(DISK *disk, FAT_File far *file, const char *name,
                   FAT_DirectoryEntry *entryOut) {
   char fatName[11];
@@ -304,15 +325,24 @@ bool FAT_FindFile(DISK *disk, FAT_File far *file, const char *name,
       fatName[i + 8] = toupper(ext[i + 1]);
   }
 
-  for (int i = 0; i < 3 && ext[i]; i++)
-    fatName[i + 8] = ext[i];
+  // for (int i = 0; i < 3 && ext[i]; i++)
+  //   fatName[i + 8] = ext[i];
+
+  // uses FAT_ReadEntry to get the direcotry entry to *entry one by one
+  printf("  ");
+  for (int i = 0; i < 11; i++)
+    putc(name[i]);
+  printf("\r\n");
 
   while (FAT_ReadEntry(disk, file, &entry)) {
-    if (memcmp(name, entry.Name, 11) == 0) {
+    // compares the filename with current entry name.
+
+    if (memcmp(fatName, entry.Name, 11) == 0) {
       *entryOut = entry;
       return true;
     }
   }
+
   return false;
 }
 
@@ -343,8 +373,9 @@ FAT_File far *FAT_Open(DISK *disk, const char *path) {
       isLast = true;
     }
 
-    // find directory entry in the current directory
     FAT_DirectoryEntry entry;
+
+    // find directory entry in the current directory
     if (FAT_FindFile(disk, current, name, &entry)) {
 
       // check if directory
