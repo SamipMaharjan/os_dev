@@ -233,10 +233,10 @@ _x86_Disk_Read:
     stc 
     int 13h 
 
-    push si 
-    mov si, msg_debug
-    call puts 
-    pop si
+    ; push si 
+    ; mov si, msg_debug
+    ; call puts 
+    ; pop si
 
     ; set return values
     mov ax, 1 

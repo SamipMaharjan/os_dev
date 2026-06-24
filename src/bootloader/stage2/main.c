@@ -49,10 +49,15 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   FAT_DirectoryEntry entry;
   int i = 0;
+  printf("ACTUAL DIR ENTRY NAMES: \r\n");
   while (FAT_ReadEntry(&disk, fd, &entry) && i++ < 5) {
-    printf("  ");
     for (int i = 0; i < 11; i++)
-      putc(entry.Name[i]);
+      if (entry.Name[i] == ' ') {
+        // puts("*");
+        printf(" %x ", entry.Name[i]);
+      } else {
+        putc(entry.Name[i]);
+      }
     printf("\r\n");
   }
   FAT_Close(fd);
@@ -60,7 +65,7 @@ void _cdecl cstart_(uint16_t bootDrive) {
   // read test.txt
   char buffer[100];
   uint32_t read;
-  fd = FAT_Open(&disk, "/TEST.TXT");
+  fd = FAT_Open(&disk, "mydir/test.txt");
   while ((read = FAT_Read(&disk, fd, sizeof(buffer), buffer))) {
     for (uint32_t i = 0; i < read; i++) {
       if (buffer[i] == '\n')
