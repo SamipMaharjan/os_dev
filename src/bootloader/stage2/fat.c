@@ -177,10 +177,12 @@ bool FAT_ReadEntry(DISK *disk, FAT_File far *file,
 }
 
 void FAT_Close(FAT_File far *file) {
+  // if its root_directory then reset position to 0
   if (file->Handle == ROOT_DIRECTORY_HANDLE) {
     file->Position = 0;
     g_Data->RootDirectory.CurrentCluster = g_Data->RootDirectory.FirstCluster;
   } else {
+    // if its normal file handle then close it.
     g_Data->OpenedFiles[file->Handle].Opened = false;
   }
 }
@@ -266,14 +268,15 @@ bool FAT_Initialize(DISK *disk) {
 }
 
 FAT_File far *FAT_OpenEntry(DISK *disk, FAT_DirectoryEntry *entry) {
-  // find empty handle
   int handle = -1;
+
+  // find empty handle
   for (int i = 0; i < MAX_FILE_HANDLES && handle < 0; i++) {
     if (!g_Data->OpenedFiles[i].Opened)
       handle = i;
   }
 
-  // if out of handles
+  // if out of handles.
   if (handle < 0) {
     printf("FAT:out of file handles");
     return false;
@@ -284,7 +287,7 @@ FAT_File far *FAT_OpenEntry(DISK *disk, FAT_DirectoryEntry *entry) {
   fd->Public.Handle = handle;
   fd->Public.IsDirectory = (entry->Attributes & FAT_ATTRIBUTE_DIRECTORY) != 0;
   fd->Public.Position = 0;
-  fd->Public.Size = 0;
+  fd->Public.Size = entry->Size;
   fd->FirstCluster =
       entry->FirstClusterLow + ((uint32_t)entry->FirstClusterHigh << 16);
   fd->CurrentCluster = fd->FirstCluster;
@@ -329,11 +332,6 @@ bool FAT_FindFile(DISK *disk, FAT_File far *file, const char *name,
   //   fatName[i + 8] = ext[i];
 
   // uses FAT_ReadEntry to get the direcotry entry to *entry one by one
-  printf("  ");
-  for (int i = 0; i < 11; i++)
-    putc(name[i]);
-  printf("\r\n");
-
   while (FAT_ReadEntry(disk, file, &entry)) {
     // compares the filename with current entry name.
 
@@ -377,14 +375,15 @@ FAT_File far *FAT_Open(DISK *disk, const char *path) {
 
     // find directory entry in the current directory
     if (FAT_FindFile(disk, current, name, &entry)) {
-
-      // check if directory
+      // check if its a directory
+      // cecks if a file is put in the midlle of the path string. Like
+      // /dir/file/file.
       if (!isLast && (entry.Attributes & FAT_ATTRIBUTE_DIRECTORY) == 0) {
         printf("FAT: %s is not a directory. \r\n", name);
         return NULL;
       }
-
-      // open new directory entry
+      // open the directory entry searched using FAT_FindFile()
+      // and put it in the file handle
       current = FAT_OpenEntry(disk, &entry);
     } else {
       FAT_Close(current);
@@ -393,7 +392,6 @@ FAT_File far *FAT_Open(DISK *disk, const char *path) {
       return NULL;
     }
   }
-
   return current;
 }
 // boolean readSectors(FILE *disk, uint32_t lba, uint32_t count, void
