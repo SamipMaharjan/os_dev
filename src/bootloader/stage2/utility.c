@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "stdio.h"
 
 uint32_t align(uint32_t number, uint32_t alignTo) {
   if (alignTo == 0) {
@@ -7,4 +8,18 @@ uint32_t align(uint32_t number, uint32_t alignTo) {
 
   uint32_t rem = number % alignTo;
   return (rem > 0) ? (number + alignTo - rem) : number;
+}
+
+uint32_t far_pointer_to_linear_address(void far *farPointer) {
+  uint32_t segment = (uint32_t)((uint32_t)farPointer >> (4 * 4));
+  uint16_t offset = (uint32_t)farPointer & 0x0000FFFF;
+
+  uint32_t linear_address = segment * 0x10 + offset;
+
+  // printf("\r\n sement * 0x10: %lx", (uint32_t)segment * 0x10);
+  printf("\r\n final address: %lx", linear_address);
+  // printf("\r\n offset* 0x10: %x", offset * 0x10);
+  // printf("\r\n original: %lx", ((uint32_t)farPointer >> 16) * 0x10);
+
+  return linear_address;
 }

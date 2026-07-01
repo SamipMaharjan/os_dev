@@ -2,6 +2,7 @@
 
 #include "disk.h"
 #include "fat.h"
+#include "gdt.h"
 #include "stdint.h"
 #include "stdio.h"
 
@@ -29,6 +30,7 @@ void _cdecl cstart_(uint16_t bootDrive) {
   // DISK_ReadSectors(disk, 0, 1, sectorBuffer);
   //
   // FAT_Initialize(disk);
+
   DISK disk;
   if (!DISK_Initialize(&disk, bootDrive)) {
     printf("Disk init error \r\n");
@@ -75,6 +77,7 @@ void _cdecl cstart_(uint16_t bootDrive) {
   }
   FAT_Close(fd);
 
+  GDT_Initialize();
 end:
   for (;;)
     ;
