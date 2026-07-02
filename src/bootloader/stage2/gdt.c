@@ -37,22 +37,14 @@ uint8_t GDT_Initialize() {
 
   // The end of GDT will contain the GDT_Pointer table;
   GDT_Pointer far *gdt_pointer = (GDT_Pointer far *)gdt_end;
-  printf("GDT_END POINTER: %lx %lx", gdt_end, gdt_pointer);
+
   gdt_pointer->Limit = gdt_size - 1;
   gdt_pointer->Base = far_pointer_to_linear_address((void far *)GDT);
-
-  uint32_t linear_GDT_pointer = far_pointer_to_linear_address(gdt_pointer);
-  printf("\r\nlinear_GDT_pointer::%lx \r\n", linear_GDT_pointer);
 
   uint16_t gdt_pointer_segment = (uint32_t)gdt_pointer >> (4 * 4);
   uint16_t gdt_pointer_offset = (uint32_t)gdt_pointer & 0x0000FFFF;
 
-  printf("\r\n gdt_pointer_segment::%x \r\n", gdt_pointer_segment);
-  printf("\r\n gdt_pointer_offset::%x \r\n", gdt_pointer_offset);
-
   x86_Set_GDTR(gdt_pointer_segment, gdt_pointer_offset);
-
-  x86_Enable_A20();
 
   return 0;
 }

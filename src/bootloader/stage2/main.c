@@ -5,6 +5,7 @@
 #include "gdt.h"
 #include "stdint.h"
 #include "stdio.h"
+#include "x86.h"
 
 void _cdecl cstart_(uint16_t bootDrive) {
   // DISK *disk;
@@ -46,16 +47,13 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   // browse files in root
   FAT_File far *fd = FAT_Open(&disk, "/");
-  printf("root dir handle: %d %d %lx %ld  \r\n", fd->Handle, fd->IsDirectory,
-         fd->Size, fd->Position);
 
   FAT_DirectoryEntry entry;
   int i = 0;
-  printf("ACTUAL DIR ENTRY NAMES: \r\n");
+  printf("\n\rACTUAL DIR ENTRY NAMES: \r\n");
   while (FAT_ReadEntry(&disk, fd, &entry) && i++ < 5) {
     for (int i = 0; i < 11; i++)
       if (entry.Name[i] == ' ') {
-        // puts("*");
         printf(" %x ", entry.Name[i]);
       } else {
         putc(entry.Name[i]);
@@ -75,9 +73,14 @@ void _cdecl cstart_(uint16_t bootDrive) {
       putc(buffer[i]);
     }
   }
+
+  // fd = FAT_Open(&disk, "kernel.bin");
+
   FAT_Close(fd);
 
   GDT_Initialize();
+  x86_Enable_A20();
+
 end:
   for (;;)
     ;

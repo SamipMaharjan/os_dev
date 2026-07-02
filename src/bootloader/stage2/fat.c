@@ -171,9 +171,6 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
       }
     }
   }
-  if (file->Handle == 0) {
-    printf("Bytes copies addresses: %x %x", u8DataOut, dataOut);
-  }
   return u8DataOut - (uint8_t *)dataOut;
 }
 
@@ -181,9 +178,6 @@ bool FAT_ReadEntry(DISK *disk, FAT_File far *file,
                    FAT_DirectoryEntry *dirEntry) {
   bool returnValue = FAT_Read(disk, file, sizeof(FAT_DirectoryEntry),
                               dirEntry) == sizeof(FAT_DirectoryEntry);
-  if (file->Handle == 0) {
-    printf("FAT_Read return value for %d:: %d \r\n", file->Handle, returnValue);
-  }
   return returnValue;
 }
 
@@ -257,8 +251,6 @@ bool FAT_Initialize(DISK *disk) {
   g_Data->RootDirectory.CurrentCluster = rootDirLba;
   g_Data->RootDirectory.CurrentSectorInCluster = 0;
 
-  printf("g_Data->RootDirectory.Buffer:%x \r\n", g_Data->RootDirectory.Buffer);
-
   if (!DISK_ReadSectors(disk, rootDirLba, 1, g_Data->RootDirectory.Buffer)) {
     printf("FAT: Read root directory filed");
     return false;
@@ -311,26 +303,7 @@ FAT_File far *FAT_OpenEntry(DISK *disk, FAT_DirectoryEntry *entry) {
   }
 
   fd->Opened = true;
-  printf("\r\n\r\nDES IT READH HEREO %d %d \r\n\r\n", fd->Public.Handle,
-         fd->Opened);
 
-  ///////////////////////////////////////////
-  char *temp = "mydir";
-  // printf("MEMCMP %d \r\n", memcmp(temp, fatName, 11));
-  // if (memcmp(temp, name, 5) == 0) {
-  if (1) {
-    int i = 0;
-    // FAT_FileData local_fd;
-    // while (i++ < 10) {
-    // printf("helo\r\n");
-    // fd = g_Data->OpenedFiles[i];
-    if (fd->Opened == true) {
-      printf("BUFFER ADDRESS OF MYDIR: %lx", fd->Buffer);
-      printf("    FD HANDLE: %d \r\n", fd->Public.Handle);
-    }
-    // }
-  }
-  ///////////////////////////////////////////
   return &fd->Public;
 }
 
@@ -364,26 +337,9 @@ bool FAT_FindFile(DISK *disk, FAT_File far *file, const char *name,
     }
   }
 
-  // printf("CURRENT FILE SEARCHING: %s \r\n", fatName);
-  printf("Current file :");
-  for (int i = 0; i < 11; i++) {
-    if (fatName[i] == ' ') {
-      puts("*");
-      // printf(" %x ", fatName[i]);
-    } else {
-      putc(fatName[i]);
-    }
-  }
-  printf("\r\n");
-  printf("\r\n");
-
   // uses FAT_ReadEntry to get the direcotry entry to *entry one by one
   while (FAT_ReadEntry(disk, file, &entry)) {
     char *temp = "TEST    TXT";
-    if (memcmp(fatName, temp, 11) == 0) {
-      printf("MEMCMP %d \r\n", memcmp(temp, fatName, 11));
-      printf("check how many iters for test.txt");
-    }
     // compares the filename with current entry name.
     if (memcmp(fatName, entry.Name, 11) == 0) {
       *entryOut = entry;

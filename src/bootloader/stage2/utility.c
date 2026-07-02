@@ -16,10 +16,5 @@ uint32_t far_pointer_to_linear_address(void far *farPointer) {
 
   uint32_t linear_address = segment * 0x10 + offset;
 
-  // printf("\r\n sement * 0x10: %lx", (uint32_t)segment * 0x10);
-  printf("\r\n final address: %lx", linear_address);
-  // printf("\r\n offset* 0x10: %x", offset * 0x10);
-  // printf("\r\n original: %lx", ((uint32_t)farPointer >> 16) * 0x10);
-
   return linear_address;
 }
