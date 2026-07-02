@@ -52,5 +52,7 @@ uint8_t GDT_Initialize() {
 
   x86_Set_GDTR(gdt_pointer_segment, gdt_pointer_offset);
 
+  x86_Enable_A20();
+
   return 0;
 }

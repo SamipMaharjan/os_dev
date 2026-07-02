@@ -17,3 +17,5 @@ bool _cdecl x86_Disk_GetDriveParams(uint8_t drive, uint8_t *driveTypeOut,
 
 void _cdecl x86_Set_GDTR(uint16_t gdt_pointer_segment,
                          uint16_t gdt_pointer_offset);
+
+void _cdecl x86_Enable_A20();
