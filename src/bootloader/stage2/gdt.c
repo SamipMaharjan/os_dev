@@ -3,6 +3,7 @@
 #include "stdint.h"
 #include "stdio.h"
 #include "utility.h"
+#include "x86.h"
 
 uint8_t GDT_Initialize() {
   GDT_Entry far *GDT = (GDT_Entry far *)GDT_BASE;
@@ -40,14 +41,16 @@ uint8_t GDT_Initialize() {
   gdt_pointer->Limit = gdt_size - 1;
   gdt_pointer->Base = far_pointer_to_linear_address((void far *)GDT);
 
-  _asm {
-      cli				
-      pusha		
-      lgdt 	[gdt_pointer]	
-      sti				
-      popa
-      ret
-  }
+  uint32_t linear_GDT_pointer = far_pointer_to_linear_address(gdt_pointer);
+  printf("\r\nlinear_GDT_pointer::%lx \r\n", linear_GDT_pointer);
+
+  uint16_t gdt_pointer_segment = (uint32_t)gdt_pointer >> (4 * 4);
+  uint16_t gdt_pointer_offset = (uint32_t)gdt_pointer & 0x0000FFFF;
+
+  printf("\r\n gdt_pointer_segment::%x \r\n", gdt_pointer_segment);
+  printf("\r\n gdt_pointer_offset::%x \r\n", gdt_pointer_offset);
+
+  x86_Set_GDTR(gdt_pointer_segment, gdt_pointer_offset);
 
   return 0;
 }

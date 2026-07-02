@@ -296,8 +296,7 @@ _x86_Disk_GetDriveParams:
     mov es, di
     stc 
     int 13h
-
-
+    
     ; return success or failure
     mov ax, 1
     sbb ax, 0
@@ -326,6 +325,31 @@ _x86_Disk_GetDriveParams:
     pop si 
     pop bx
     pop es
+
+    ; restore old call frame
+    mov sp, bp
+    pop bp
+    ret
+
+
+global _x86_Set_GDTR
+_x86_Set_GDTR: 
+    push bp                   ; save old call frame
+    mov bp, sp                ; initialize new call frame
+
+    cli
+    pusha
+    push ds
+
+    mov ds, [bp+4]           ; segment to GDTR table || first arg
+    mov bx, [bp+6]           ; address to GDTR table || second arg
+    xchg bx, bx
+    lgdt 	[bx]
+
+    pop ds
+    popa
+    sti
+    ; ret
 
     ; restore old call frame
     mov sp, bp

@@ -14,4 +14,6 @@ bool _cdecl x86_Disk_Read(uint8_t drive, uint16_t cylinder, uint16_t head,
 bool _cdecl x86_Disk_GetDriveParams(uint8_t drive, uint8_t *driveTypeOut,
                                     uint16_t *cylindersOut,
                                     uint16_t *sectorsOut, uint16_t *headsOut);
-void _cdecl x86_Install_GDT();
+
+void _cdecl x86_Set_GDTR(uint16_t gdt_pointer_segment,
+                         uint16_t gdt_pointer_offset);
