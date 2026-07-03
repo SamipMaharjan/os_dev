@@ -233,11 +233,6 @@ _x86_Disk_Read:
     stc 
     int 13h 
 
-    ; push si 
-    ; mov si, msg_debug
-    ; call puts 
-    ; pop si
-
     ; set return values
     mov ax, 1 
     sbb ax, 0                 ; 1 = true, 0  = false
@@ -391,10 +386,8 @@ _x86_Enable_A20:
         out     0x64,al
 
         call    wait_input
-	popa
+	      popa
         sti
-        ret
-
     ; restore old call frame
     mov sp, bp
     pop bp

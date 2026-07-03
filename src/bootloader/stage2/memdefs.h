@@ -12,11 +12,18 @@
 
 // 0x00020000 - 0x00030000 - stage2
 
-// 0x00030000 - 0x00030100 - GDT
+// 0x00030000 - 0x00080000 - free
+//
+// 0x00040000 - 0x00040100 - GDT
 #define GDT_BASE ((void far *)0x40000000)
 
-// 0x00030000 - 0x00080000 - free
+// 0x00040500 - 0x00040100 - GDT
 
 // 0x00080000 - 0x0009FFFF - Extended BIOS data area
 // 0x000A0000 - 0x000C7FFF - Video
 // 0x000C8000 - 0x000FFFFF - BIOS
+//
+// 0x000F4240
+//
+// 0x00100000 - 0x001114095 - Kernel32
+#define KERNEL_32_START ((void far *)0xFFFF0010) // results to 0x00100000

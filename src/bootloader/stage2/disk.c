@@ -38,7 +38,6 @@ bool DISK_ReadSectors(DISK *disk, uint32_t lba, uint8_t sectors,
   uint16_t cylinder, sector, head;
   DISK_LBA2CHS(disk, lba, &cylinder, &head, &sector);
 
-  // printf("Hello read sectors");
   for (int i = 0; i < 3; i++) {
     bool ok = x86_Disk_Read(disk->id, cylinder, head, sector, sectors, dataOut);
     if (ok) {

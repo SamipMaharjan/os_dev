@@ -95,11 +95,13 @@ uint32_t FAT_NextCluster(uint32_t currentCluster) {
 boolean FAT_ReadBootSector(DISK *disk) {
   // copying the raw bytes in the first sector to g_BootSector pointer.
   // return fread(&g_BootSector, sizeof(g_BootSector), 1, disk) > 0;
+
   return DISK_ReadSectors(disk, 0, 1, g_Data->BS.BootSectorBytes);
 }
 
 uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
                   void *dataOut) {
+
   // get file data using handle
   FAT_FileData far *fd = (file->Handle == ROOT_DIRECTORY_HANDLE)
                              ? &g_Data->RootDirectory

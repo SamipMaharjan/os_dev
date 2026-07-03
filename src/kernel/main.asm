@@ -44,6 +44,6 @@ puts:
   ret
 
 
-msg_hello: db 'Hello world! from kernel', ENDL, 0
+msg_hello: db 'Hello world! from kernel updated ', ENDL, 0
 ; $ - start of the current line
 ; $$ - start of the current section i.e. 0x7C00

@@ -15,7 +15,10 @@ bool _cdecl x86_Disk_GetDriveParams(uint8_t drive, uint8_t *driveTypeOut,
                                     uint16_t *cylindersOut,
                                     uint16_t *sectorsOut, uint16_t *headsOut);
 
+// Sets up the value in GDTR register using LGDT instruction
 void _cdecl x86_Set_GDTR(uint16_t gdt_pointer_segment,
                          uint16_t gdt_pointer_offset);
 
+// Appearently A20 line is always on for Emulators like Bochs and QEMU.
+// But just in case this thing runs on real hardware one day ;)
 void _cdecl x86_Enable_A20();

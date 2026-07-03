@@ -3,42 +3,18 @@
 #include "disk.h"
 #include "fat.h"
 #include "gdt.h"
+#include "memdefs.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "x86.h"
 
 void _cdecl cstart_(uint16_t bootDrive) {
-  // DISK *disk;
-  // static uint8_t sectorBuffer[512];
-  // const char *far_str = "far string";
-  //
-  // printf("Formatted %% %c %s %ls\r\n", 'a', "string", far_str);
-  //
-  // printf("Formatted %d %i %x %p %o %hd %hi %hhu %hhd\r\n", 1234, -5678,
-  // 0xdead,
-  //        0xbeef, 012345, (short)27, (short)-42, (unsigned char)20,
-  //        (signed char)-10);
-  //
-  // printf("Formatted %ld %lx %lld %llx\r\n", -100000000l, 0xdeadbeeful,
-  //        10200300400ll, 0xdeadbeeffeebdaedull);
-  //
-  // // Reads Drive parameters using 13h 08h and stores it in disk.
-  // DISK_Initialize(disk, bootDrive);
-  //
-  // printf("\n\n DISK PARAMETERS of disk %d : %d %d %d ", bootDrive,
-  //        disk->cylinders, disk->heads, disk->sectors);
-  //
-  // DISK_ReadSectors(disk, 0, 1, sectorBuffer);
-  //
-  // FAT_Initialize(disk);
 
   DISK disk;
   if (!DISK_Initialize(&disk, bootDrive)) {
     printf("Disk init error \r\n");
     goto end;
   }
-
-  // DISK_ReadSectors(&disk, 19, 1, g_Data);
 
   if (!FAT_Initialize(&disk)) {
     printf("FAT init error\r\n");
@@ -65,7 +41,10 @@ void _cdecl cstart_(uint16_t bootDrive) {
   // read test.txt
   char buffer[100];
   uint32_t read;
+  // printf("\r\n Buffer address thats passed %x\r\n", buffer);
+
   fd = FAT_Open(&disk, "mydir/test.txt");
+
   while ((read = FAT_Read(&disk, fd, sizeof(buffer), buffer))) {
     for (uint32_t i = 0; i < read; i++) {
       if (buffer[i] == '\n')
@@ -74,12 +53,37 @@ void _cdecl cstart_(uint16_t bootDrive) {
     }
   }
 
-  // fd = FAT_Open(&disk, "kernel.bin");
+  fd = FAT_Open(&disk, "kernel.bin");
+
+  printf("\r\nKernel bin file handle: %d", fd->Handle);
+  printf("\r\nKernel bin buffer address: %lx", KERNEL_32_START);
+
+  uint8_t far *kernel32 = (uint8_t far *)KERNEL_32_START;
+  uint16_t currentByte = 0;
+
+  while ((read = FAT_Read(&disk, fd, sizeof(buffer), buffer))) {
+    for (uint32_t i = 0; i < read; i++) {
+      kernel32[currentByte] = buffer[i];
+      currentByte++;
+      // if (buffer[i] == '\n')
+      //   putc('\r');
+      // putc(buffer[i]);
+      printf(" %x ", buffer[i]);
+    }
+  }
 
   FAT_Close(fd);
 
   GDT_Initialize();
+
   x86_Enable_A20();
+
+  uint8_t *dataOut = (uint8_t *)0xFFFF;
+
+  printf("\r\nfar pointer behaviour testing: %x\r\n", dataOut);
+  *dataOut = 0b11111111;
+  dataOut += 1;
+  printf("\r\nfar pointer behaviour testing: %x\r\n", dataOut);
 
 end:
   for (;;)
