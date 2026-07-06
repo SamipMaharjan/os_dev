@@ -22,3 +22,11 @@ void _cdecl x86_Set_GDTR(uint16_t gdt_pointer_segment,
 // Appearently A20 line is always on for Emulators like Bochs and QEMU.
 // But just in case this thing runs on real hardware one day ;)
 void _cdecl x86_Enable_A20();
+
+// Enables protected mode by setting bit-0 of cr0 register.
+void _cdecl x86_Enable_Pmode();
+
+// //
+// void _cdecl x86_Init_Segment_Regs_For_Pmode();
+
+//

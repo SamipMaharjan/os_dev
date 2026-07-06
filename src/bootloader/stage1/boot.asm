@@ -235,6 +235,7 @@ start:
 
   ; setup segment registers for stage2
   mov ax, STAGE2_LOAD_SEGMENT 
+  ; xor ax, ax
   mov ds, ax
   mov es, ax
 

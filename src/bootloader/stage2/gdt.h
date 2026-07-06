@@ -25,12 +25,19 @@ typedef struct {
                       // Bit 45: Something for virtual Memory
                       // Bit 46-47: Provledge level of this segment descriptor
 
-  uint8_t Granularity; // Bit 48-47 : 16-19 bits of segment's limit
-                       // Bit 52: Reserved for OS
-                       // Bit 53: Reserved also
-                       // Bit 54: Is it gdt for 16bit system or 32 bit system
-                       // Bit 55: Is Granularity true or false. if 1 then
-                       //     segment limit is in 4KB pages
+  uint8_t
+      Granularity; // Bit 48-47 : 16-19 bits of segment's limit
+                   // Bit 52: Reserved for OS
+                   // Bit 53: Reserved also
+                   // Bit 54: Is it gdt for 16bit system or 32 bit system
+                   // Bit 55: Is Granularity true or false. if 1 then
+                   //     segment limit is in 4KB pages
+                   //     formula for
+                   //     calculating final limit = limit * 4KB + 4KB
+                   //                           which becomes = limit * 0x1000 +
+                   //                           0xFFF since we count the first
+                   //                           byte as byte 0 so 4KB last
+                   //                           offset is 0xfff.
 
   uint8_t SegmentBase3; // Bit 56-63: Final 8 bytes of segment base address
 } GDT_Entry;

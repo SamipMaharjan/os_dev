@@ -17,6 +17,8 @@
 ;     - All others saved by callee
 
 %define ENDL 0x0D, 0x0A ; Hex for  \r \n  for putting cursor in newline
+%define DATA_DESC 0x10  ; 2x8 bytes offset of GDTR
+%define CODE_DESC 0x8   ; 8 bytes offset of GDTR
 
 bits 16
 
@@ -439,3 +441,35 @@ puts:
 
 
 msg_debug: db 'DEBUG ASM', ENDL, 0
+
+global _x86_Enable_Pmode
+_x86_Enable_Pmode:
+  cli
+  mov eax, cr0
+  or eax, 1
+  mov cr0, eax
+
+  xchg bx, bx
+
+;  Initializing the segment registers before jumping to kernel
+   mov ax, DATA_DESC 
+   mov ds, ax
+   mov es, ax
+   mov ss, ax
+   mov esp, 0x90000
+
+  xchg bx, bx
+  ; Jumping to kernel
+  jmp dword CODE_DESC:0x00100000
+
+; org 0x20000
+; bits 32
+;
+; global  _x86_Init_Segment_Regs_For_Pmode
+; _x86_Init_Segment_Regs_For_Pmode: 
+;   ; xchg bx, bx
+   ; mov ax, DATA_DESC 
+   ; mov ds, ax
+   ; mov es, ax
+   ; mov ss, ax
+   ; mov esp, 0x90000

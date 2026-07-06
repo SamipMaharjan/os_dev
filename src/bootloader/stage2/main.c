@@ -61,6 +61,7 @@ void _cdecl cstart_(uint16_t bootDrive) {
   uint8_t far *kernel32 = (uint8_t far *)KERNEL_32_START;
   uint16_t currentByte = 0;
 
+  // Reading kernel from disk to 0x00100000;
   while ((read = FAT_Read(&disk, fd, sizeof(buffer), buffer))) {
     for (uint32_t i = 0; i < read; i++) {
       kernel32[currentByte] = buffer[i];
@@ -78,13 +79,25 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   x86_Enable_A20();
 
-  uint8_t *dataOut = (uint8_t *)0xFFFF;
+  x86_Enable_Pmode();
 
-  printf("\r\nfar pointer behaviour testing: %x\r\n", dataOut);
-  *dataOut = 0b11111111;
-  dataOut += 1;
-  printf("\r\nfar pointer behaviour testing: %x\r\n", dataOut);
+// Enabling protected mode by setting bit-0 of cr0 register to 1
+// _asm {
+// cli
+// mov eax, cr0
+// or eax, 1
+// mov cr0, eax
+//
+//  xchg bx, bx
+//  mov ax, 0x10
+//  mov ds, ax
+//  mov es, ax
+//  mov ss, ax
+//  mov esp, 0x90000
+// }
 
+// x86_Init_Segment_Regs_For_Pmode();
+// _asm xchg bx, bx;
 end:
   for (;;)
     ;
