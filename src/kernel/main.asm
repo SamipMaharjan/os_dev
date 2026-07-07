@@ -104,7 +104,70 @@ Puts32:
   jmp .loop
 
 .done: 
+  mov bl, [_CurrY]
+  mov bh, [_CurrX]
+
+  call .MoveCursor
+
   popa 
   ret
+
+; Move cursor to current x/y position
+.MoveCursor: 
+  ; calculate the current position in string
+  ; as its not current pos in memory we can use the formula
+  ; pos = x + y * columns
+  pusha
+
+  xchg bx, bx
+  xor eax, eax
+  mov al, bl
+  mov cl, Cols
+  mul cl              ; y * columns
+  shr bx, 8
+  add ax, bx          ; x + y * columns
+
+  ; storing final position in bx as ax is required by I/O
+  mov bx, ax          
+
+  ; Now, we use Port Mapped I/O instructions 
+  ; 0x3D4 :- Read/Write to Instruction register
+  ; 0x3D5 :- Read/Write to Data register
+  ; And in the instruction register:
+  ; 0x0E :- indicates the upper byte of cursor position
+  ; 0x0F :- indicates the lower byte of cursor position
+  
+  ; I/O write to instruction register of VGA.
+  ; Indicates Data reg will have lower byte of cursor position.
+  mov dx, 0x3D4
+  mov al, 0x0F
+  out dx, al 
+
+  ; I/O write to data reg of VGA. 
+  ; The lower byte of cursor position.
+  mov dx, 0x3D5
+  mov al, bl          ;why the hell out no take bl reggggggggggggg
+  out dx, al
+
+  ; I/O write to instruction register of VGA.
+  ; Indicates Data reg will have upper byte of cursor position.
+  mov dx, 0x3D4
+  mov ax, 0x0E
+  out dx, ax
+
+  ; I/O write to data reg of VGA. 
+  ; The upper byte of cursor position.
+  mov dx, 0x3D5
+  mov al, bh
+  out dx, al
+
+  popa 
+  ret
+
+
+   
+
+  
+
 
 print_msg db 'Hello World From Protected Mode and VGA', 0;
