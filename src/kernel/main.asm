@@ -2,9 +2,13 @@ org 0x100000
 bits 32
 
 start: 
-  xchg  bx, bx
-  mov bl, 'B'
-  call Putch32
+  ; xchg  bx, bx
+  ; mov bl, 'B'
+  ; call Putch32
+  mov ebx, print_msg
+  call Puts32
+  cli 
+  hlt
 
 %define VIDMEM 0xB8000        ; Base address of Color Video Memory
 %define Cols 80
@@ -73,3 +77,34 @@ Putch32:
   ret
 
 
+; Puts32():
+; ebx: address of start of string
+Puts32: 
+  ; save registers
+  pusha
+  ; save string address
+  mov edi, ebx
+
+; start loop
+.loop:
+  ; xchg bx, bx
+  ; get current character
+  mov bl, [edi]
+  ; check if its null character or not
+  cmp bl, 0
+  jz .done
+  ; if not then call putc32 
+
+  call Putch32
+  ; update current character pointer or bl register
+  
+; restart loop
+.Next: 
+  inc edi
+  jmp .loop
+
+.done: 
+  popa 
+  ret
+
+print_msg db 'Hello World From Protected Mode and VGA', 0;
