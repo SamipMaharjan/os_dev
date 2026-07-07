@@ -449,7 +449,6 @@ _x86_Enable_Pmode:
   or eax, 1
   mov cr0, eax
 
-  xchg bx, bx
 
 ;  Initializing the segment registers before jumping to kernel
    mov ax, DATA_DESC 
@@ -458,7 +457,6 @@ _x86_Enable_Pmode:
    mov ss, ax
    mov esp, 0x90000
 
-  xchg bx, bx
   ; Jumping to kernel
   jmp dword CODE_DESC:0x00100000
 
@@ -467,7 +465,6 @@ _x86_Enable_Pmode:
 ;
 ; global  _x86_Init_Segment_Regs_For_Pmode
 ; _x86_Init_Segment_Regs_For_Pmode: 
-;   ; xchg bx, bx
    ; mov ax, DATA_DESC 
    ; mov ds, ax
    ; mov es, ax

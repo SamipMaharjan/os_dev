@@ -88,7 +88,6 @@ void _cdecl cstart_(uint16_t bootDrive) {
 // or eax, 1
 // mov cr0, eax
 //
-//  xchg bx, bx
 //  mov ax, 0x10
 //  mov ds, ax
 //  mov es, ax
@@ -97,7 +96,6 @@ void _cdecl cstart_(uint16_t bootDrive) {
 // }
 
 // x86_Init_Segment_Regs_For_Pmode();
-// _asm xchg bx, bx;
 end:
   for (;;)
     ;
