@@ -2,10 +2,11 @@ org 0x100000
 bits 32
 
 start: 
-  ; xchg  bx, bx
-  ; mov bl, 'B'
-  ; call Putch32
+  call ClrScreen32
   mov ebx, print_msg
+
+  mov [_CurrX], 19
+  mov [_CurrY], 11
   call Puts32
   cli 
   hlt
@@ -13,10 +14,10 @@ start:
 %define VIDMEM 0xB8000        ; Base address of Color Video Memory
 %define Cols 80
 %define Lines 25
-%define CHAR_ATTRIBUTE 14
+%define CHAR_ATTRIBUTE 0x17
 
-_CurrX db 5
-_CurrY db 5
+_CurrX db 0
+_CurrY db 0
 
 
 ;
@@ -25,7 +26,6 @@ _CurrY db 5
 ;
 Putch32: 
   pusha
-
 
   mov edi, VIDMEM
 
@@ -46,8 +46,7 @@ Putch32:
   mov cl, byte [ _CurrX ]     ; insert value of x in cl
   add eax, ecx                ; x + y * Cols
   shl eax, 1                  ; ( y*Cols )2
-
-  add edi, eax      ; Add final result with VIDMEM to get the exact position in memory. 
+  add edi, eax                ; Add final result with VIDMEM to get the exact position in memory. 
 
 
 ; watch for a new line
@@ -61,7 +60,7 @@ Putch32:
   
 ; update cursor position
   inc byte  [_CurrX]
-  cmp [_CurrX], 0x0A
+  cmp [_CurrX], Cols
   jz .Rows
   jmp .done
 
@@ -106,20 +105,20 @@ Puts32:
 .done: 
   mov bl, [_CurrY]
   mov bh, [_CurrX]
-
-  call .MoveCursor
+  call MoveCursor
 
   popa 
   ret
 
 ; Move cursor to current x/y position
-.MoveCursor: 
+; bl: Current Y pos
+; bh, Current X pos
+MoveCursor: 
   ; calculate the current position in string
   ; as its not current pos in memory we can use the formula
   ; pos = x + y * columns
   pusha
 
-  xchg bx, bx
   xor eax, eax
   mov al, bl
   mov cl, Cols
@@ -164,6 +163,29 @@ Puts32:
   popa 
   ret
 
+
+;ClrScreen32() 
+; Clears the Screen 
+ClrScreen32:
+  pusha
+  cld                     ; clear direction flag:
+                          ; determines whether the edi will be incremented or decremeneted on repe instruction
+  mov edi, VIDMEM
+  mov cx, 2000            ; used by repe instruction
+  mov ah, CHAR_ATTRIBUTE  ; char to be printed
+  mov al, ' '             ; attribute byte
+  repe stosw
+
+  mov [_CurrX], 0
+  mov [_CurrY], 0
+  xor bx, bx              ; bh and bl are args for MoveCursor
+  call MoveCursor
+
+
+  
+
+  popa 
+  ret
 
    
 
