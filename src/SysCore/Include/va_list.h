@@ -1,3 +1,5 @@
+// Abstraction for variable length parameter data type.
+
 /* va list parameter list */
 typedef unsigned char *va_list;
 

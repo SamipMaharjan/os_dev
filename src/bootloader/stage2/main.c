@@ -81,21 +81,6 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   x86_Enable_Pmode();
 
-// Enabling protected mode by setting bit-0 of cr0 register to 1
-// _asm {
-// cli
-// mov eax, cr0
-// or eax, 1
-// mov cr0, eax
-//
-//  mov ax, 0x10
-//  mov ds, ax
-//  mov es, ax
-//  mov ss, ax
-//  mov esp, 0x90000
-// }
-
-// x86_Init_Segment_Regs_For_Pmode();
 end:
   for (;;)
     ;

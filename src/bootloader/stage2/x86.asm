@@ -445,10 +445,11 @@ msg_debug: db 'DEBUG ASM', ENDL, 0
 global _x86_Enable_Pmode
 _x86_Enable_Pmode:
   cli
+
+
   mov eax, cr0
   or eax, 1
   mov cr0, eax
-
 
 ;  Initializing the segment registers before jumping to kernel
    mov ax, DATA_DESC 
@@ -457,7 +458,7 @@ _x86_Enable_Pmode:
    mov ss, ax
    mov esp, 0x90000
 
-  ; Jumping to kernel
+  ; Jumping to kernel also sets the CS register to code descriptor
   jmp dword CODE_DESC:0x00100000
 
 ; org 0x20000

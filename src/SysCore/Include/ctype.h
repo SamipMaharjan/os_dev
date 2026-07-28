@@ -1,3 +1,5 @@
+// Macros for helping determine type of character in a string.
+
 extern char _ctype[];
 
 #define CT_UP 0x01  /* upper case */
