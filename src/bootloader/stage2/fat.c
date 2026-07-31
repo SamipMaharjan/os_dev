@@ -100,7 +100,7 @@ boolean FAT_ReadBootSector(DISK *disk) {
 }
 
 uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
-                  void *dataOut) {
+                  void far *dataOut) {
 
   // get file data using handle
   FAT_FileData far *fd = (file->Handle == ROOT_DIRECTORY_HANDLE)
