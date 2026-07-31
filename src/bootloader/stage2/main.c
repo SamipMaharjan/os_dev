@@ -1,6 +1,7 @@
 #pragma once
 
 #include "disk.h"
+#include "elf.h"
 #include "fat.h"
 #include "gdt.h"
 #include "memdefs.h"
@@ -39,9 +40,8 @@ void _cdecl cstart_(uint16_t bootDrive) {
   FAT_Close(fd);
 
   // read test.txt
-  char buffer[100];
+  char buffer[512];
   uint32_t read;
-  // printf("\r\n Buffer address thats passed %x\r\n", buffer);
 
   fd = FAT_Open(&disk, "mydir/test.txt");
 
@@ -53,25 +53,24 @@ void _cdecl cstart_(uint16_t bootDrive) {
     }
   }
 
-  fd = FAT_Open(&disk, "kernel.bin");
+  FAT_File far *elf_file;
+  elf_file = FAT_Open(&disk, "kernel.elf");
 
-  printf("\r\nKernel bin file handle: %d", fd->Handle);
-  printf("\r\nKernel bin buffer address: %lx", KERNEL_32_START);
+  // TODO: This static size for storing elf header will be a problem when size
+  // of elf headers exceeds 512. Its better to calculate the total size of ELF
+  // and Program Headers using the values from ELF headers
+  uint8_t elfHeaders[512];
+  printf("\r\n elf Headers %x", elfHeaders);
 
-  uint8_t far *kernel32 = (uint8_t far *)KERNEL_32_START;
-  uint16_t currentByte = 0;
+  FAT_Read(&disk, elf_file, sizeof(elfHeaders), elfHeaders);
 
-  // Reading kernel from disk to 0x00100000;
-  while ((read = FAT_Read(&disk, fd, sizeof(buffer), buffer))) {
-    for (uint32_t i = 0; i < read; i++) {
-      kernel32[currentByte] = buffer[i];
-      currentByte++;
-      // if (buffer[i] == '\n')
-      //   putc('\r');
-      // putc(buffer[i]);
-      printf(" %x ", buffer[i]);
-    }
-  }
+  // printf("elfHeaders address: %x", elfHeaders);
+  // printRawBytes((const char *)elfHeaders, 512);
+  // Reading ELF file headers from disk to 0x00030000
+
+  printf("\r\nMEMORY_ELF_KERNEL %lx \r\n", MEMORY_ELF_KERNEL);
+  ELF_Load(elfHeaders, fd, &disk, MEMORY_ELF_KERNEL);
+  // printf("elfHeaders address: %x", elfHeaders);
 
   FAT_Close(fd);
 
@@ -81,6 +80,7 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   x86_Enable_Pmode();
 
+// x86_Init_Segment_Regs_For_Pmode();
 end:
   for (;;)
     ;

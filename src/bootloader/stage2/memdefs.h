@@ -14,6 +14,9 @@
 
 // 0x00030000 - 0x00080000 - free
 //
+// 0x00030000 - 0x00031500
+#define MEMORY_ELF_KERNEL ((void far *)0x30000000)
+
 // 0x00040000 - 0x00040100 - GDT
 #define GDT_BASE ((void far *)0x40000000)
 

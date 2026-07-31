@@ -33,10 +33,10 @@ $(BUILD_DIR)/main_floppy.img: bootloader kernel
 
 	#  mcopy: tool to copy to/from fat file systems without mounting them.
 	#  -i: tells to treat file as an image.
-	#  kernel.bin is the input file.
+	#  kernel.elf is the input file.
 	#  :: says it to copy it in the root directory section of the fat fs.
 	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/stage2.bin "::stage2.bin"
-	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.bin "::kernel.bin"
+	mcopy -i $(BUILD_DIR)/main_floppy.img $(BUILD_DIR)/kernel.elf "::kernel.elf"
 	# for testing
 	mcopy -i $(BUILD_DIR)/main_floppy.img test.txt "::test.txt"
 	mmd -i $(BUILD_DIR)/main_floppy.img "::mydir"
@@ -64,9 +64,9 @@ $(BUILD_DIR)/stage2.bin: always
 #
 # Kernel
 #
-kernel: $(BUILD_DIR)/kernel.bin
+kernel: $(BUILD_DIR)/kernel.elf
 
-$(BUILD_DIR)/kernel.bin: always
+$(BUILD_DIR)/kernel.elf: always
 	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR))
 
 #
