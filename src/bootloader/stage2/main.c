@@ -7,6 +7,7 @@
 #include "memdefs.h"
 #include "stdint.h"
 #include "stdio.h"
+#include "utility.h"
 #include "x86.h"
 
 void _cdecl cstart_(uint16_t bootDrive) {
@@ -58,19 +59,13 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   // TODO: This static size for storing elf header will be a problem when size
   // of elf headers exceeds 512. Its better to calculate the total size of ELF
-  // and Program Headers using the values from ELF headers
+  // and Program Headers dynamically using the values from ELF headers
   uint8_t elfHeaders[512];
-  printf("\r\n elf Headers %x", elfHeaders);
-
   FAT_Read(&disk, elf_file, sizeof(elfHeaders), elfHeaders);
 
-  // printf("elfHeaders address: %x", elfHeaders);
-  // printRawBytes((const char *)elfHeaders, 512);
-  // Reading ELF file headers from disk to 0x00030000
-
-  printf("\r\nMEMORY_ELF_KERNEL %lx \r\n", MEMORY_ELF_KERNEL);
-  ELF_Load(elfHeaders, fd, &disk, MEMORY_ELF_KERNEL);
-  // printf("elfHeaders address: %x", elfHeaders);
+  // Reading ELF file headers from disk to 0x00100000
+  ELF_Load(elfHeaders, elf_file, &disk, MEMORY_PARSED_KERNEL);
+  breakpoint();
 
   FAT_Close(fd);
 

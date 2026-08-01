@@ -1,5 +1,4 @@
 #include "stdint.h"
-#include "stdio.h"
 
 uint32_t align(uint32_t number, uint32_t alignTo) {
   if (alignTo == 0) {
@@ -18,3 +17,5 @@ uint32_t far_pointer_to_linear_address(void far *farPointer) {
 
   return linear_address;
 }
+
+void breakpoint() { _asm xchg bx, bx }

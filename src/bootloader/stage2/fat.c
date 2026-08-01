@@ -100,14 +100,15 @@ boolean FAT_ReadBootSector(DISK *disk) {
 }
 
 uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
-                  void *dataOut) {
+                  void far *dataOut) {
+  // if(0x)
+
+  uint8_t *u8DataOut = (uint8_t *)dataOut;
 
   // get file data using handle
   FAT_FileData far *fd = (file->Handle == ROOT_DIRECTORY_HANDLE)
                              ? &g_Data->RootDirectory
                              : &g_Data->OpenedFiles[file->Handle];
-
-  uint8_t *u8DataOut = (uint8_t *)dataOut;
 
   // If its a direcotry then allow reading past the file for the current sector
   // As subdirectory size is 0.
@@ -128,8 +129,14 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
     // 512 sized buffer
     uint32_t take = min(byteCount, leftInBuffer);
 
+    // printf("\r\n 11how does wcc handle near pointer on a far pointer
+    // argument, "
+    //        "%lx",
+    //        u8DataOut);
+    // printf("\r\n 11 near pointer on a far pointer argument, %x", u8DataOut);
     // copy 1 sector or less of data from fd->Buffer to u8DataOut
     memcpy(u8DataOut, fd->Buffer + fd->Public.Position % SECTOR_SIZE, take);
+
     u8DataOut += take;
     fd->Public.Position += take;
     byteCount -= take;

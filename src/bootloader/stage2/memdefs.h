@@ -29,4 +29,4 @@
 // 0x000F4240
 //
 // 0x00100000 - 0x001114095 - Kernel32
-#define KERNEL_32_START ((void far *)0xFFFF0010) // results to 0x00100000
+#define MEMORY_PARSED_KERNEL ((void far *)0xFFFF0010) // results to 0x00100000
