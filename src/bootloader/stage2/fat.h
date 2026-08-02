@@ -64,7 +64,7 @@ bool FAT_ReadEntry(DISK *disk, FAT_File far *file,
 // contain all the data then reads 512 bytes of data from disk to Buffer before
 // copying again. Repeats this till all data is copied to *dataOut.
 uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
-                  void far *dataOut);
+                  uint32_t offsetPosition, void far *dataOut);
 
 // Called to close a file handle
 // file file handle is root-dir then resets its position to 0.

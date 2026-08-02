@@ -1,6 +1,7 @@
 #include "fat.h"
 #include "stdint.h"
 
+#pragma pack(push, 1)
 typedef struct {
   uint32_t segmentType;
   uint32_t fileOffset;
@@ -11,6 +12,7 @@ typedef struct {
   uint32_t flags;
   uint32_t alignment;
 } ELF_ProgramHeader;
+#pragma pack(pop)
 
-void ELF_Load(uint8_t *elfHeaders, FAT_File *file, DISK *disk,
+void ELF_Load(uint8_t *elfHeaders, FAT_File far *file, DISK *disk,
               void far *dataOut);

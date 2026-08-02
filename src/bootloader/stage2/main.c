@@ -46,7 +46,7 @@ void _cdecl cstart_(uint16_t bootDrive) {
 
   fd = FAT_Open(&disk, "mydir/test.txt");
 
-  while ((read = FAT_Read(&disk, fd, sizeof(buffer), buffer))) {
+  while ((read = FAT_Read(&disk, fd, sizeof(buffer), 0, buffer))) {
     for (uint32_t i = 0; i < read; i++) {
       if (buffer[i] == '\n')
         putc('\r');
@@ -57,15 +57,21 @@ void _cdecl cstart_(uint16_t bootDrive) {
   FAT_File far *elf_file;
   elf_file = FAT_Open(&disk, "kernel.elf");
 
+  // printf("elf_file size :%lx position: %lx ", )
+
   // TODO: This static size for storing elf header will be a problem when size
   // of elf headers exceeds 512. Its better to calculate the total size of ELF
   // and Program Headers dynamically using the values from ELF headers
   uint8_t elfHeaders[512];
-  FAT_Read(&disk, elf_file, sizeof(elfHeaders), elfHeaders);
+  FAT_Read(&disk, elf_file, sizeof(elfHeaders), 0, elfHeaders);
 
+  // uint8_t far *ptr1 = (uint8_t far *)0x00010001;
+  // uint8_t far *ptr2 = (uint8_t far *)0x00010010;
+  // printf("\r\n ptr2 - ptr1:%x-%x: %x", (uint32_t *)ptr2, (uint32_t *)ptr1,
+  //        (uint8_t *)ptr2 - (uint8_t *)ptr1);
   // Reading ELF file headers from disk to 0x00100000
+
   ELF_Load(elfHeaders, elf_file, &disk, MEMORY_PARSED_KERNEL);
-  breakpoint();
 
   FAT_Close(fd);
 

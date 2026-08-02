@@ -100,23 +100,57 @@ boolean FAT_ReadBootSector(DISK *disk) {
 }
 
 uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
-                  void far *dataOut) {
-  // if(0x)
+                  uint32_t offsetPosition, void far *dataOut) {
 
-  uint8_t *u8DataOut = (uint8_t *)dataOut;
+  uint8_t far *u8DataOut = (uint8_t far *)dataOut;
 
   // get file data using handle
   FAT_FileData far *fd = (file->Handle == ROOT_DIRECTORY_HANDLE)
                              ? &g_Data->RootDirectory
                              : &g_Data->OpenedFiles[file->Handle];
 
+  // printf("\r\nfd.handle: %x, actual fd.handle %x", fd->Public.Handle,
+  // file->Handle);
+
   // If its a direcotry then allow reading past the file for the current sector
   // As subdirectory size is 0.
   if (!fd->Public.IsDirectory) {
+
+    // printf("\r\n bc: %lx, s: %lx, p: %lx", byteCount, fd->Public.Size,
+    //        fd->Public.Position);
+    // printf("\r\n direct bc: %lx, s: %lx, p: %lx", byteCount, file->Size,
+    //        file->Position);
+
     // Total size left to be read
     // Also prevents reading past a file.
     // if byteCount exceedes the file size then it wont read past the file.
     byteCount = min(byteCount, fd->Public.Size - fd->Public.Position);
+
+    // if offsetPosition > 0 (the initial buffer with first 512 of file)
+    // Then it means the caller is trying to read directoly into an offset
+    // within a file. Thus the buffer must contain the data of the offset.
+    if (offsetPosition > 0) {
+      // This will get the cluster index
+      uint16_t remainingEntries = offsetPosition / SECTOR_SIZE;
+      printf("\r\n remainingEntries: %x", remainingEntries);
+      uint16_t currentCluster = fd->FirstCluster;
+      printf("\r\n currentCluster: %x", currentCluster);
+
+      breakpoint();
+      while (remainingEntries > 0) {
+        currentCluster = FAT_NextCluster(currentCluster);
+        remainingEntries--;
+      }
+      printf("\r\n final Cluster value: %x", currentCluster);
+
+      uint32_t lba = FAT_ClusterToLba(currentCluster);
+      printf("\r\n lba: %x", lba);
+
+      // Read the cluster with offset data to buffer
+      DISK_ReadSectors(disk, lba, 1, fd->Buffer);
+
+      breakpoint();
+    }
   }
 
   while (byteCount > 0) {
@@ -135,6 +169,7 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
     //        u8DataOut);
     // printf("\r\n 11 near pointer on a far pointer argument, %x", u8DataOut);
     // copy 1 sector or less of data from fd->Buffer to u8DataOut
+    // printf("\r\n u8: %lx, fd.buf: %d");
     memcpy(u8DataOut, fd->Buffer + fd->Public.Position % SECTOR_SIZE, take);
 
     u8DataOut += take;
@@ -180,12 +215,13 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
       }
     }
   }
-  return u8DataOut - (uint8_t *)dataOut;
+
+  return (uint8_t *)u8DataOut - (uint8_t *)dataOut;
 }
 
 bool FAT_ReadEntry(DISK *disk, FAT_File far *file,
                    FAT_DirectoryEntry *dirEntry) {
-  bool returnValue = FAT_Read(disk, file, sizeof(FAT_DirectoryEntry),
+  bool returnValue = FAT_Read(disk, file, sizeof(FAT_DirectoryEntry), 0,
                               dirEntry) == sizeof(FAT_DirectoryEntry);
   return returnValue;
 }
@@ -409,6 +445,10 @@ FAT_File far *FAT_Open(DISK *disk, const char *path) {
       return NULL;
     }
   }
+
+  printf("current entry position size: %lx, %lx", current->Position,
+         current->Size);
+
   return current;
 }
 // boolean readSectors(FILE *disk, uint32_t lba, uint32_t count, void
