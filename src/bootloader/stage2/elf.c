@@ -28,15 +28,15 @@ void ELF_Load(uint8_t *elfHeaders, FAT_File far *file, DISK *disk,
     uint32_t memSize = ProgramHeader->memSize;
     uint32_t fileOffset = ProgramHeader->fileOffset;
 
-    printf("\r\nKernel.elf debug size: %lx, pos: %lx, off: %lx", file->Size,
+    printf("\r\nKernel.elf debug size: %lx, pos: %lx, off: %lx", fileSize,
            file->Position, fileOffset);
     // printf("\r\n disk file filesize outputPointer:  %x, %lx, %lx", file,
     // ProgramHeader->fileSize, outputPointer);
-    // Read segment to dataOut
 
+    // LOAD segment to dataOut
     uint32_t readBytes =
         FAT_Read(disk, file, fileSize, fileOffset, (void far *)outputPointer);
-    printf("\r\n Read bytes: %lx  ", readBytes);
+    printf("\r\n Read bytes: %lx ", readBytes);
 
     outputPointer = (uint8_t far *)outputPointer + memSize;
     current_entry += 1;

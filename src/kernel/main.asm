@@ -1,6 +1,7 @@
 ; org 0x100000
 bits 32
 
+extern kernel_main
 start: 
   call ClrScreen32
   mov ebx, print_msg
@@ -8,6 +9,8 @@ start:
   mov [_CurrX], 19
   mov [_CurrY], 11
   call Puts32
+  xchg bx,bx
+  ; call kernel_main
   cli 
   hlt
 
