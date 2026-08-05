@@ -132,6 +132,8 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
     if (offsetPosition > 0) {
       fd->Public.Position = offsetPosition;
       // This will get the cluster index
+      printf(
+          "\r\n *******************BEFORE INITIAL DISK READ****************");
       uint16_t remainingEntries = offsetPosition / SECTOR_SIZE;
       printf("\r\n remainingEntries: %x", remainingEntries);
       uint16_t currentCluster = fd->FirstCluster;
@@ -148,7 +150,6 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
       printf("\r\n lba: %x", lba);
 
       printf("\r\nBUFER: %x ", fd->Buffer);
-      breakpoint();
       // Read the cluster with offset data to buffer
       DISK_ReadSectors(disk, lba, 1, fd->Buffer);
     }
@@ -176,7 +177,6 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
       printf("\r\n Byte count before : %lx", byteCount);
       printf("\r\n take count before : %lx", take);
       printf("\r\n dataOut ptr before : %lx", u8DataOut);
-      breakpoint();
     }
     memcpy(u8DataOut, fd->Buffer + fd->Public.Position % SECTOR_SIZE, take);
 
@@ -188,10 +188,10 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
     if (byteCount > 0) {
 
       if (offsetPosition > 0) {
+        printf("\r\n *******************AFTER MEM READ****************");
         printf("\r\n Byte count: %lx", byteCount);
         printf("\r\n take count : %lx", take);
         printf("\r\n dataOut ptr : %lx", u8DataOut);
-        breakpoint();
       }
 
       // Special handling for root directory as FAT_Read is used to read root
@@ -227,7 +227,6 @@ uint32_t FAT_Read(DISK *disk, FAT_File far *file, uint32_t byteCount,
           printf("\r\n curr cluster sector in cluster, %lx, %lx",
                  fd->CurrentCluster, fd->CurrentSectorInCluster);
           printf("\r\n does it reach here, %lx, %lx", byteCount, lba);
-          breakpoint();
         }
 
         // read next sector

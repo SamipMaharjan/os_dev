@@ -5,7 +5,7 @@
 typedef struct {
   uint32_t segmentType;
   uint32_t fileOffset;
-  uint32_t dstAddr;
+  uint32_t virtualAddr;
   uint32_t physicalAddr;
   uint32_t fileSize;
   uint32_t memSize;
