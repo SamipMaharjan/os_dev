@@ -3,21 +3,23 @@ bits 32
 
 extern kernel_main
 start: 
-  call ClrScreen32
-  mov ebx, print_msg
+  call kernel_main
 
-  mov [_CurrX], 19
-  mov [_CurrY], 11
-  call Puts32
-  xchg bx,bx
-  ; call kernel_main
+  ; call ClrScreen32
+  ; mov ebx, print_msg
+  ;
+  ; mov [_CurrX], 19
+  ; mov [_CurrY], 11
+  ; call Puts32
+
   cli 
   hlt
 
 %define VIDMEM 0xB8000        ; Base address of Color Video Memory
 %define Cols 80
 %define Lines 25
-%define CHAR_ATTRIBUTE 0x17
+%define CHAR_ATTRIBUTE 0x17   ; Bits 0-3 foreground color
+                              ; Bits 4-7 background color
 
 _CurrX db 0
 _CurrY db 0
@@ -89,7 +91,6 @@ Puts32:
 
 ; start loop
 .loop:
-  ; xchg bx, bx
   ; get current character
   mov bl, [edi]
   ; check if its null character or not
@@ -173,10 +174,10 @@ ClrScreen32:
   pusha
   cld                     ; clear direction flag:
                           ; determines whether the edi will be incremented or decremeneted on repe instruction
-  mov edi, VIDMEM
-  mov cx, 2000            ; used by repe instruction
-  mov ah, CHAR_ATTRIBUTE  ; char to be printed
-  mov al, ' '             ; attribute byte
+  mov edi, VIDMEM         ; stosw uses ES:EDI registers 
+  mov cx, 2000            ; used by repe instruction & VGA's 80x25 grid
+  mov ah, CHAR_ATTRIBUTE  ; attribute byte
+  mov al, ' '             ; character to be printed
   repe stosw
 
   mov [_CurrX], 0

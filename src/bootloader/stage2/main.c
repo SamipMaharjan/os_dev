@@ -60,8 +60,8 @@ void _cdecl cstart_(uint16_t bootDrive) {
   // printf("elf_file size :%lx position: %lx ", )
 
   // TODO: This static size for storing elf header will be a problem when size
-  // of elf headers exceeds 512. Its better to calculate the total size of ELF
-  // and Program Headers dynamically using the values from ELF headers
+  // of program headers exceeds 512bytes. Its better to calculate the total size
+  // of ELF and Program Headers dynamically using the values from ELF header
   uint8_t elfHeaders[512];
   FAT_Read(&disk, elf_file, sizeof(elfHeaders), 0, elfHeaders);
 
