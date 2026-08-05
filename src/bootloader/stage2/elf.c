@@ -2,7 +2,6 @@
 #include "fat.h"
 #include "stdint.h"
 #include "stdio.h"
-#include "utility.h"
 
 void far *LinearToFar(uint32_t linear) {
   uint16_t segment;
@@ -26,19 +25,27 @@ void far *LinearToFar(uint32_t linear) {
 
 void ELF_Load(uint8_t *elfHeaders, FAT_File far *file, DISK *disk,
               void far *dataOut) {
-  uint32_t program_header_offset = elfHeaders[28];
-  uint16_t program_header_size = elfHeaders[42];
-  uint16_t program_header_entries = elfHeaders[44];
-  uint8_t far *outputPointer = (uint8_t far *)dataOut;
+  // uint32_t program_header_offset = elfHeaders[28];
+  // uint16_t program_header_size = elfHeaders[42];
+  // uint16_t program_header_entries = elfHeaders[44];
+  Elf32_Ehdr *elf32_ehdr = (Elf32_Ehdr *)elfHeaders;
+  uint32_t program_header_offset = elf32_ehdr->e_phoff;
+  uint16_t program_header_size = elf32_ehdr->e_phentsize;
+  uint16_t program_header_entries = elf32_ehdr->e_phnum;
 
-  uint8_t current_entry = 0;
+  // uint8_t far *outputPointer = (uint8_t far *)dataOut;
 
-  while (current_entry < program_header_entries) {
-    printf("\r\noutputPointer : %lx", outputPointer);
+  for (uint8_t current_entry = 0; current_entry < program_header_entries;
+       current_entry++) {
+    // printf("\r\noutputPointer : %lx", outputPointer);
     uint16_t current_entry_offset =
         program_header_offset + current_entry * program_header_size;
     ELF_ProgramHeader *ProgramHeader =
         (ELF_ProgramHeader *)(elfHeaders + current_entry_offset);
+
+    if (ProgramHeader->segmentType != 1) {
+      continue;
+    }
 
     // Get the segment offset from program header
     // file->Position = ProgramHeader->fileOffset;
@@ -63,7 +70,6 @@ void ELF_Load(uint8_t *elfHeaders, FAT_File far *file, DISK *disk,
 
     printf("\r\n Read bytes: %lx ", readBytes);
 
-    outputPointer = (uint8_t far *)outputPointer + memSize;
-    current_entry += 1;
+    // outputPointer = (uint8_t far *)outputPointer + memSize;
   }
 };
