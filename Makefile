@@ -69,14 +69,14 @@ kernel: $(BUILD_DIR)/kernel.elf
 $(BUILD_DIR)/kernel.elf: always
 	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR))
 
+# #
+# # Tools
+# #
+# tools_fat: $(BUILD_DIR)/tools/fat
 #
-# Tools
-#
-tools_fat: $(BUILD_DIR)/tools/fat
-
-$(BUILD_DIR)/tools/fat: always $(TOOLS_DIR)/fat/fat.c
-	mkdir -p $(BUILD_DIR)/tools
-	$(CC) -g -o $(BUILD_DIR)/tools/fat $(TOOLS_DIR)/fat/fat.c
+# $(BUILD_DIR)/tools/fat: always $(TOOLS_DIR)/fat/fat.c
+# 	mkdir -p $(BUILD_DIR)/tools
+# 	$(CC) -g -o $(BUILD_DIR)/tools/fat $(TOOLS_DIR)/fat/fat.c
 
 #
 # Always

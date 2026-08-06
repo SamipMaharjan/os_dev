@@ -2,6 +2,7 @@
 #include "fat.h"
 #include "stdint.h"
 #include "stdio.h"
+#include "utility.h"
 
 void far *LinearToFar(uint32_t linear) {
   uint16_t segment;
