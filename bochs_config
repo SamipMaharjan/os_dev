@@ -6,3 +6,4 @@ boot: floppy
 mouse:enabled=0
 display_library: x, options="gui_debug"
 magic_break: enabled=1
+com1: enabled=1, mode=file, dev=./serial.log
