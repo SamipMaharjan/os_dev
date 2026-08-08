@@ -1,0 +1,4 @@
+CompileFlags:
+  Add:
+    - -Iinclude
+    - --target=i686-unknown-elf

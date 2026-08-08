@@ -1,7 +1,9 @@
+If:
+  PathMatch: ^src/bootloader/.*
+
 CompileFlags:
   Add:
     - "-xc"
-    - --target=i686-unknown-elf
     - -m16
     - "-std=c11"
     - -ffreestanding
@@ -9,3 +11,14 @@ CompileFlags:
     - "-Dfar="
     - "-Dnear="
     - "-Dhuge="
+
+---
+
+If:
+  PathMatch: ^src/kernel/.*
+
+CompileFlags:
+  Add:
+    - -m32
+    - -Isrc/kernel/include
+    - --target=i686-unknown-elf

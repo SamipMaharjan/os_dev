@@ -2,7 +2,6 @@
 bits 32
 extern kernel_main
 start: 
- xchg bx, bx 
   call kernel_main
 
   ; call ClrScreen32

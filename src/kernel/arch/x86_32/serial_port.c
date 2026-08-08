@@ -39,7 +39,6 @@ void serial_write(const char *str) {
   }
 }
 
-void breakpoint() { __asm__ volatile("xchg %bx, %bx"); }
 // void kernel_main(void) {
 //   serial_init();
 //   serial_write("Hello, kernel World!\n");
