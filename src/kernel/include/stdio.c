@@ -1,18 +1,6 @@
-#include "stdio.h"
-#include "stdint.h"
-#include "x86.h"
-
-int *printf_number(int *argp, int length, bool sign, int radix);
-
-void putc(char c) { x86_Video_WriteCharTeletype(c, 0); }
-
-void puts(const char *str) {
-  while (*str) {
-    putc(*str);
-    str++;
-  }
-};
-
+#include "arch/x86_32/serial_port.h"
+#include "arch/x86_32/vga.h"
+#include <stdbool.h>
 // States
 #define PRINTF_STATE_NORMAL 0
 #define PRINTF_STATE_LENGTH 1
@@ -27,15 +15,115 @@ void puts(const char *str) {
 #define PRINTF_LENGTH_LONG 3
 #define PRINTF_LENGTH_LONG_LONG 4
 
-// Since CDECL calling convention is being used. the arguments ot the functions
-// are contigious in stack memory, like :
-// 0x2000:*fmt || 0x2002:arg2 || ... || X: argX
+const char g_HexChars[] = "0123456789abcdef";
 
-void _cdecl printf(const char *fmt, ...) {
+void putc(char c) {
+  terminal_putchar(c);
+  serial_putchar(c);
+}
+
+void puts(const char *str) {
+  while (*str) {
+    putc(*str);
+    str++;
+  }
+};
+
+int *printf_number(int *argp, int length, bool sign, int radix) {
+  char buffer[32];
+  unsigned long long number;
+  int number_sign = 1;
+  int pos = 0;
+
+  // The following switch case does:
+  // 1. Considers size of arguments and extracts them from stack.
+  // 2. Considers size of arguments and updates pointer value to the next
+  // argument in stack.
+  // 3. Prints the extracted argument / number.
+  switch (length) {
+  case PRINTF_LENGTH_SHORT_SHORT:
+  case PRINTF_LENGTH_SHORT:
+  case PRINTF_LENGTH_DEFAULT:
+    if (sign) {
+      int n = *argp;
+      if (n < 0) {
+        n = -n;           // converting it to positive
+        number_sign = -1; // storing the sign as negative
+      }
+      number = (unsigned long long)n; // Type casting it to unsigned long long
+    } else {
+      number = *(unsigned int *)argp;
+    }
+    argp++;
+    break;
+
+  case PRINTF_LENGTH_LONG:
+    if (sign) {
+      long int n = *(long int *)argp;
+      if (n < 0) {
+        n = -n;
+        number_sign = -1;
+      }
+      number = (unsigned long long)n;
+    } else {
+      number = *(unsigned long int *)argp;
+    }
+    argp += 2;
+    break;
+
+  case PRINTF_LENGTH_LONG_LONG:
+    if (sign) {
+      long long int n = *(long long int *)argp;
+      if (n < 0) {
+        n = -n;
+        number_sign = -1;
+      }
+      number = (unsigned long long)n;
+    } else {
+      number = *(unsigned long long *)argp;
+    }
+    argp += 4;
+    break;
+  }
+
+  // convert number to ASCII/string
+  do {
+    // uint32_t rem = number % radix;
+    // number = number / radix;
+    // x86_div64_32(number, radix, &number, &rem);
+
+    uint32_t rem = number % radix;
+    number = number / radix;
+
+    buffer[pos++] = g_HexChars[rem];
+  } while (number > 0);
+  // add sign
+  if (sign && number_sign < 0) {
+    buffer[pos++] = '-';
+  }
+
+  // print number in reverse order
+  while (--pos >= 0)
+    putc(buffer[pos]);
+
+  return argp;
+}
+
+void printRawBytes(const char *buffer, int no_of_bytes) {
+  int current_byte = 1;
+
+  while (current_byte <= no_of_bytes) {
+    putc(*buffer);
+    // printf("%c", *buffer);
+    buffer++;
+    current_byte++;
+  }
+}
+
+void printf(const char *fmt, ...) {
   int *argp = (int *)&fmt; // putting it as (int*) because stack is
                            // sizeof(int)/2bytes. And so that we can find next
                            // argument by incrementing the pointer.
-
   int state = PRINTF_STATE_NORMAL;
   int length = PRINTF_LENGTH_DEFAULT;
   int radix = 10;
@@ -151,97 +239,5 @@ void _cdecl printf(const char *fmt, ...) {
     }
 
     fmt++;
-  }
-}
-
-const char g_HexChars[] = "0123456789abcdef";
-
-// Takes length  sign and base of number and returns the inceremented pointer
-// depending on the datatype
-int *printf_number(int *argp, int length, bool sign, int radix) {
-  char buffer[32];
-  unsigned long long number;
-  int number_sign = 1;
-  int pos = 0;
-
-  // The following switch case does:
-  // 1. Considers size of arguments and extracts them from stack.
-  // 2. Considers size of arguments and updates pointer value to the next
-  // argument in stack.
-  // 3. Prints the extracted argument / number.
-  switch (length) {
-  case PRINTF_LENGTH_SHORT_SHORT:
-  case PRINTF_LENGTH_SHORT:
-  case PRINTF_LENGTH_DEFAULT:
-    if (sign) {
-      int n = *argp;
-      if (n < 0) {
-        n = -n;           // converting it to positive
-        number_sign = -1; // storing the sign as negative
-      }
-      number = (unsigned long long)n; // Type casting it to unsigned long long
-    } else {
-      number = *(unsigned int *)argp;
-    }
-    argp++;
-    break;
-
-  case PRINTF_LENGTH_LONG:
-    if (sign) {
-      long int n = *(long int *)argp;
-      if (n < 0) {
-        n = -n;
-        number_sign = -1;
-      }
-      number = (unsigned long long)n;
-    } else {
-      number = *(unsigned long int *)argp;
-    }
-    argp += 2;
-    break;
-
-  case PRINTF_LENGTH_LONG_LONG:
-    if (sign) {
-      long long int n = *(long long int *)argp;
-      if (n < 0) {
-        n = -n;
-        number_sign = -1;
-      }
-      number = (unsigned long long)n;
-    } else {
-      number = *(unsigned long long *)argp;
-    }
-    argp += 4;
-    break;
-  }
-
-  // convert number to ASCII/string
-  do {
-    // uint32_t rem = number % radix;
-    // number = number / radix;
-    uint32_t rem;
-    x86_div64_32(number, radix, &number, &rem);
-    buffer[pos++] = g_HexChars[rem];
-  } while (number > 0);
-  // add sign
-  if (sign && number_sign < 0) {
-    buffer[pos++] = '-';
-  }
-
-  // print number in reverse order
-  while (--pos >= 0)
-    putc(buffer[pos]);
-
-  return argp;
-}
-
-void printRawBytes(const char *buffer, int no_of_bytes) {
-  int current_byte = 1;
-
-  while (current_byte <= no_of_bytes) {
-    putc(*buffer);
-    // printf("%c", *buffer);
-    buffer++;
-    current_byte++;
   }
 }

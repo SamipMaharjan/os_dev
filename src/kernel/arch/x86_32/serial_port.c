@@ -38,10 +38,3 @@ void serial_write(const char *str) {
     serial_putchar(*str++);
   }
 }
-
-// void kernel_main(void) {
-//   serial_init();
-//   serial_write("Hello, kernel World!\n");
-//   serial_write("hehe Hello, kernel World!\n");
-//   serial_write("hehe 2Hello, kernel World!\n");
-// }

@@ -1,2 +1,1 @@
-void breakpoint();
 void cause_division_error();

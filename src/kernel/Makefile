@@ -18,7 +18,7 @@ DIRECTORIES=$(shell find  -type d)
 OBJECTS_C=$(patsubst %.c, $(BUILD_DIR)/kernel/c/%.o, $(SOURCES_C))
 OBJECTS_ASM=$(patsubst %.asm, $(BUILD_DIR)/kernel/asm/%.o, $(SOURCES_ASM))
 
-C_FLAGS= -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude
+C_FLAGS= -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude -I.
 
 .PHONY: all kernel clean always
 
@@ -44,6 +44,7 @@ always:
 # mkdir -p $(DIRECTORIES:%=build/%)
 	mkdir -p $(BUILD_DIR)/kernel/asm
 	mkdir -p $(DIRECTORIES:%=$(BUILD_DIR)/kernel/c/%)
+	mkdir -p $(DIRECTORIES:%=$(BUILD_DIR)/kernel/asm/%)
 	# mkdir -p $(BUILD_DIR)/kernel/c
 	# mkdir -p $(BUILD_DIR)/kernel/c/arch/x86_32
 	# mkdir -p $(BUILD_DIR)/kernel/c/include/utils

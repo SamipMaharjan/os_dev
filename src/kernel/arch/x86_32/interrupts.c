@@ -1,4 +1,5 @@
 #include "serial_port.h"
+#include "utils/asm_helper.h"
 #include "utils/helpers.h"
 #include "vga.h"
 #include <stdint.h>
@@ -26,7 +27,14 @@ void IDT_LIDT() {
   terminal_writestring("IDT_LIDT");
   serial_write("IDT_LIDT");
 
-  breakpoint();
+  Interrupt_Descriptor *curr_idt = &idt[0];
+  curr_idt->offset_1 = 0x2000;
+  curr_idt->selector = 0x08;
+  curr_idt->type_attributes = 0b10001111;
+
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));
-  breakpoint();
 };
+
+// static void IDT_Setup(){
+//
+// }

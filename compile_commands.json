@@ -12,28 +12,11 @@
       "-O2",
       "-Wall",
       "-Wextra",
-      "-Iinclude"
+      "-Iinclude",
+      "-I."
     ],
     "directory": "/home/samip/Desktop/projects/os_dev/src/kernel",
     "output": "/home/samip/Desktop/projects/os_dev/build/kernel/c/./arch/x86_32/vga.o"
-  },
-  {
-    "file": "arch/x86_32/serial_port.c",
-    "arguments": [
-      "/home/samip/Desktop/projects/BuildCrossCompiler/i686-elf/bin/i686-elf-gcc",
-      "-c",
-      "arch/x86_32/serial_port.c",
-      "-o",
-      "/home/samip/Desktop/projects/os_dev/build/kernel/c/./arch/x86_32/serial_port.o",
-      "-std=gnu99",
-      "-ffreestanding",
-      "-O2",
-      "-Wall",
-      "-Wextra",
-      "-Iinclude"
-    ],
-    "directory": "/home/samip/Desktop/projects/os_dev/src/kernel",
-    "output": "/home/samip/Desktop/projects/os_dev/build/kernel/c/./arch/x86_32/serial_port.o"
   },
   {
     "file": "arch/x86_32/interrupts.c",
@@ -48,10 +31,30 @@
       "-O2",
       "-Wall",
       "-Wextra",
-      "-Iinclude"
+      "-Iinclude",
+      "-I."
     ],
     "directory": "/home/samip/Desktop/projects/os_dev/src/kernel",
     "output": "/home/samip/Desktop/projects/os_dev/build/kernel/c/./arch/x86_32/interrupts.o"
+  },
+  {
+    "file": "arch/x86_32/serial_port.c",
+    "arguments": [
+      "/home/samip/Desktop/projects/BuildCrossCompiler/i686-elf/bin/i686-elf-gcc",
+      "-c",
+      "arch/x86_32/serial_port.c",
+      "-o",
+      "/home/samip/Desktop/projects/os_dev/build/kernel/c/./arch/x86_32/serial_port.o",
+      "-std=gnu99",
+      "-ffreestanding",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I."
+    ],
+    "directory": "/home/samip/Desktop/projects/os_dev/src/kernel",
+    "output": "/home/samip/Desktop/projects/os_dev/build/kernel/c/./arch/x86_32/serial_port.o"
   },
   {
     "file": "include/utils/helpers.c",
@@ -66,10 +69,30 @@
       "-O2",
       "-Wall",
       "-Wextra",
-      "-Iinclude"
+      "-Iinclude",
+      "-I."
     ],
     "directory": "/home/samip/Desktop/projects/os_dev/src/kernel",
     "output": "/home/samip/Desktop/projects/os_dev/build/kernel/c/./include/utils/helpers.o"
+  },
+  {
+    "file": "include/stdio.c",
+    "arguments": [
+      "/home/samip/Desktop/projects/BuildCrossCompiler/i686-elf/bin/i686-elf-gcc",
+      "-c",
+      "include/stdio.c",
+      "-o",
+      "/home/samip/Desktop/projects/os_dev/build/kernel/c/./include/stdio.o",
+      "-std=gnu99",
+      "-ffreestanding",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I."
+    ],
+    "directory": "/home/samip/Desktop/projects/os_dev/src/kernel",
+    "output": "/home/samip/Desktop/projects/os_dev/build/kernel/c/./include/stdio.o"
   },
   {
     "file": "kernel.c",
@@ -84,7 +107,8 @@
       "-O2",
       "-Wall",
       "-Wextra",
-      "-Iinclude"
+      "-Iinclude",
+      "-I."
     ],
     "directory": "/home/samip/Desktop/projects/os_dev/src/kernel",
     "output": "/home/samip/Desktop/projects/os_dev/build/kernel/c/./kernel.o"
