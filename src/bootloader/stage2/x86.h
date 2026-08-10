@@ -24,7 +24,7 @@ void _cdecl x86_Set_GDTR(uint16_t gdt_pointer_segment,
 void _cdecl x86_Enable_A20();
 
 // Enables protected mode by setting bit-0 of cr0 register.
-void _cdecl x86_Enable_Pmode();
+void _cdecl x86_Enable_Pmode(uint32_t entryAddr);
 
 // //
 // void _cdecl x86_Init_Segment_Regs_For_Pmode();

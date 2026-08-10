@@ -445,7 +445,10 @@ msg_debug: db 'DEBUG ASM', ENDL, 0
 global _x86_Enable_Pmode
 _x86_Enable_Pmode:
   cli
-
+  ; store entry address
+  mov bp, sp
+  mov ebx, [bp+2]
+  ; mov [ENTRY_ADDRESS], eax
 
   mov eax, cr0
   or eax, 1
@@ -458,8 +461,15 @@ _x86_Enable_Pmode:
    mov ss, ax
    mov esp, 0x90000
 
-  ; Jumping to kernel also sets the CS register to code descriptor
-  jmp dword CODE_DESC:0x00100000
+  ; pushing segment selector and dynamic entry_addr to stack 
+  ; This is the best way to jump to a dynamic addr for this section.
+  ; As we cannot use other general purpose regs 
+  push CODE_DESC
+  push ebx
+
+  ; Jumping to the CODE_DESC:ENTRY_ADDRESS stored in stack 
+  ; also sets the CS register to code descriptor
+  jmp far dword [esp]
 
 ; org 0x20000
 ; bits 32

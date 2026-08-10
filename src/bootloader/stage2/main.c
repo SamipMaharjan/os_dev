@@ -63,6 +63,8 @@ void _cdecl cstart_(uint16_t bootDrive) {
   // of program headers exceeds 512bytes. Its better to calculate the total size
   // of ELF and Program Headers dynamically using the values from ELF header
   uint8_t elfHeaders[512];
+  Elf32_Ehdr *elf32_ehdr = (Elf32_Ehdr *)elfHeaders;
+
   FAT_Read(&disk, elf_file, sizeof(elfHeaders), 0, elfHeaders);
 
   // uint8_t far *ptr1 = (uint8_t far *)0x00010001;
@@ -71,15 +73,15 @@ void _cdecl cstart_(uint16_t bootDrive) {
   //        (uint8_t *)ptr2 - (uint8_t *)ptr1);
   // Reading ELF file headers from disk to 0x00100000
 
+  x86_Enable_A20();
+
   ELF_Load(elfHeaders, elf_file, &disk, MEMORY_PARSED_KERNEL);
 
   FAT_Close(fd);
 
   GDT_Initialize();
 
-  x86_Enable_A20();
-
-  x86_Enable_Pmode();
+  x86_Enable_Pmode(elf32_ehdr->e_entry);
 
 // x86_Init_Segment_Regs_For_Pmode();
 end:

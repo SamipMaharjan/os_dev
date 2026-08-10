@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "utils/asm_helper.h"
 #include "utils/helpers.h"
+#include <stdint.h>
 
 void kernel_main(void) {
   terminal_initialize();
@@ -20,8 +21,18 @@ void kernel_main(void) {
   printf("\nHello world from stdio with char %c", 'c');
   printf("\nHello world from stdio with hex %llx", 0xdeadbeeffeebdead);
 
-  breakpoint();
+  printf("\nHello world from stdio with hex %lx", cause_division_error);
+  // uint32_t a = 0xFFFFEEEE;
+  // uint16_t b = a;
+  // uint32_t upperBitsOffset = a & 0xFFFF0000;
+  // upperBitsOffset = upperBitsOffset >> 16;
+  // printf("\n print b %x", b);
+  // printf("\n print ubo %x", upperBitsOffset);
+
   IDT_LIDT();
+  breakpoint();
   cause_division_error();
+
+  // printf("\n Printf after division error ");
   // breakpoint();
 }

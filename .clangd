@@ -1,0 +1,11 @@
+CompileFlags:
+  Add:
+    - "-xc"
+    - --target=i686-unknown-elf
+    - -m16
+    - "-std=c11"
+    - -ffreestanding
+    - -D_cdecl=__attribute__((cdecl))
+    - "-Dfar="
+    - "-Dnear="
+    - "-Dhuge="

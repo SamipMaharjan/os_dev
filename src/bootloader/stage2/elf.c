@@ -70,7 +70,5 @@ void ELF_Load(uint8_t *elfHeaders, FAT_File far *file, DISK *disk,
         FAT_Read(disk, file, fileSize, fileOffset, virtualAddr);
 
     printf("\r\n Read bytes: %lx ", readBytes);
-
-    // outputPointer = (uint8_t far *)outputPointer + memSize;
   }
 };
