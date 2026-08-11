@@ -1,4 +1,6 @@
 void IDT_LIDT();
-void division_error();
+void divide_error();
+void debug_exception();
 void double_fault();
 void general_protection_fault();
+void nmi();

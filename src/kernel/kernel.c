@@ -2,7 +2,6 @@
 #include "arch/x86_32/serial_port.h"
 #include "arch/x86_32/vga.h"
 #include "stdio.h"
-#include "utils/asm_helper.h"
 #include "utils/helpers.h"
 #include <stdint.h>
 
@@ -14,7 +13,7 @@ void kernel_main(void) {
   printf("\nHello world from stdio with string %s", "the string");
   printf("\nHello world from stdio with char %c", 'c');
   printf("\nHello world from stdio with hex %llx", 0xdeadbeeffeebdead);
-  printf("\nHello world from stdio with hex %lx", cause_division_error);
+  printf("\nHello world from stdio with hex %lx", cause_divide_error);
   // uint32_t a = 0xFFFFEEEE;
   // uint16_t b = a;
   // uint32_t upperBitsOffset = a & 0xFFFF0000;
@@ -24,9 +23,9 @@ void kernel_main(void) {
 
   IDT_LIDT();
 
-  cause_gpf();
+  // cause_db();
+  cause_nmi();
   breakpoint();
-  printf("After GPF");
 
   // printf("\n Printf after division error ");
   // breakpoint();

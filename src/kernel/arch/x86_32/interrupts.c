@@ -1,7 +1,6 @@
 #include "interrupts.h"
 #include "serial_port.h"
 #include "stdio.h"
-#include "utils/asm_helper.h"
 #include "utils/helpers.h"
 #include "vga.h"
 #include <stdint.h>
@@ -45,20 +44,32 @@ void IDT_LIDT() {
   // curr_idt->selector = 0x08;
   // curr_idt->type_attributes = 0b10001111;
 
-  printf("Cause divion error address: %x", &division_error);
+  printf("Cause divion error address: %x", &divide_error);
 
-  set_idt_entry(&idt[0], (uint32_t)&division_error, CODE_DESC, 0b10001111);
+  set_idt_entry(&idt[0], (uint32_t)&divide_error, CODE_DESC, 0b10001111);
+  set_idt_entry(&idt[1], (uint32_t)&debug_exception, CODE_DESC, 0b10001111);
+  set_idt_entry(&idt[2], (uint32_t)&nmi, CODE_DESC, 0b10001111);
   set_idt_entry(&idt[8], (uint32_t)&double_fault, CODE_DESC, 0b10001111);
   set_idt_entry(&idt[13], (uint32_t)&general_protection_fault, CODE_DESC,
                 0b10001111);
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));
 };
 
+// isr13
 void GPF(int errCode) {
   printf("\n******************General Protection Fault*******************");
   printf("\nError Code: 0x%x", errCode);
 }
 
-// static void IDT_Setup(){
-//
-// }
+// isr14
+void PageFault(int errCode) {
+  printf("\n******************PAGE FAULT*******************");
+  printf("\nError Code: 0x%x", errCode);
+}
+
+// isr2
+void DebugException(int debugReg) {
+  printf("\n******************DEBUG EXCEPTION*******************");
+  // todo: push all debug regs and print
+  printf("\nDebug Register: 0x%x", debugReg);
+}
