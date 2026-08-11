@@ -22,6 +22,9 @@ typedef struct {
 static Interrupt_Descriptor idt[255]; // 255 entries in IDT
 static IDTR idtr;
 
+#define CODE_DESC 0x08
+#define DATA_DESC 0x10
+
 static void set_idt_entry(Interrupt_Descriptor *curr_idt, uint32_t offset,
                           uint16_t selector, uint8_t type_attributes) {
   uint32_t upperBitsOffset = offset & 0xFFFF0000;
@@ -44,10 +47,17 @@ void IDT_LIDT() {
 
   printf("Cause divion error address: %x", &division_error);
 
-  set_idt_entry(&idt[0], (uint32_t)&division_error, 0x08, 0b10001111);
-
+  set_idt_entry(&idt[0], (uint32_t)&division_error, CODE_DESC, 0b10001111);
+  set_idt_entry(&idt[8], (uint32_t)&double_fault, CODE_DESC, 0b10001111);
+  set_idt_entry(&idt[13], (uint32_t)&general_protection_fault, CODE_DESC,
+                0b10001111);
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));
 };
+
+void GPF(int errCode) {
+  printf("\n******************General Protection Fault*******************");
+  printf("\nError Code: 0x%x", errCode);
+}
 
 // static void IDT_Setup(){
 //

@@ -7,3 +7,9 @@ cause_division_error:
   div ebx
   ret
 
+global cause_gpf
+cause_gpf: 
+  xor ax, ax
+  mov ax, 0x99      ; arbitrary invalid selector
+  mov ds, ax
+  ret
