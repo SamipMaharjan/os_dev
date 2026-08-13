@@ -17,11 +17,14 @@ cause_gpf:
 global cause_pf
 cause_pf: 
 
+
 global cause_db
 cause_db: 
+  xchg bx, bx
   pushfd
   or dword [esp], 0x0100
   popfd
+  nop
   nop
 
 global cause_nmi

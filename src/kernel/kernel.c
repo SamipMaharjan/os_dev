@@ -21,12 +21,11 @@ void kernel_main(void) {
   // printf("\n print b %x", b);
   // printf("\n print ubo %x", upperBitsOffset);
 
+  breakpoint();
   IDT_LIDT();
 
-  // cause_db();
   cause_nmi();
   breakpoint();
-
   // printf("\n Printf after division error ");
   // breakpoint();
 }

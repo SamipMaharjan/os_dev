@@ -4,10 +4,10 @@ extern printf
 
 ; isr0
 global divide_error
-msg: db 0x0D, 0x0A,"**********************DVISION ERROR****************", 0
+extern DivideError
+; msg: db 0x0D, 0x0A,"**********************DIVIDE ERROR****************", 0
 divide_error: 
-  push msg
-  call printf
+  call DivideError
   jmp hang
 
 
@@ -15,11 +15,12 @@ divide_error:
 global debug_exception
 extern DebugException
 debug_exception: 
+  xchg bx, bx
 ;  Use the debug registers later
-  pushad
+  ; pushad
   call DebugException
-  popad
-  add esp, 4
+  ; popad
+  ; add esp, 4
   jmp hang
 
 

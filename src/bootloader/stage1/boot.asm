@@ -310,7 +310,7 @@ puts:
 ;   - cx [bits 6-15]: cylinder
 ;   - dh: head
 lba_to_chs:
-  push ax
+  push ax                           
   push dx
 
   xor dx, dx                        ; Setting dx to 0 before using div instruction as it uses dx register

@@ -34,6 +34,16 @@ static void set_idt_entry(Interrupt_Descriptor *curr_idt, uint32_t offset,
   curr_idt->selector = selector;
   curr_idt->type_attributes = type_attributes;
 }
+static void print_stack_frame(char *exceptionName, uint32_t eflags,
+                              uint32_t segmentSelector, uint32_t errorAddr,
+                              uint32_t errorCode) {
+  printf("\n%s", exceptionName);
+  printf("\nEFLAGS: %x", eflags);
+  printf("\nSELECTOR: %x", segmentSelector);
+  printf("\nERROR ADDRESS: %x", errorAddr);
+  if (errorCode != 0)
+    printf("\n%x", errorAddr);
+}
 
 void IDT_LIDT() {
   idtr.base = (uint32_t)idt;
@@ -55,6 +65,22 @@ void IDT_LIDT() {
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));
 };
 
+// isr0
+void DivideError(uint32_t errorAddr, uint32_t segmentSelector,
+                 uint32_t eflags) {
+  print_stack_frame("*******************DIVIDE ERROR********************",
+                    eflags, segmentSelector, errorAddr, 0);
+}
+
+// isr2
+void DebugException(uint32_t errorAddr, uint32_t segmentSelector,
+                    uint32_t eflags, int debugReg) {
+  print_stack_frame("*******************DEBUG EXCEPTION********************",
+                    eflags, segmentSelector, errorAddr, 0);
+  // todo: push all debug regs and print
+  // printf("\nDebug Register: 0x%x", debugReg);
+}
+
 // isr13
 void GPF(int errCode) {
   printf("\n******************General Protection Fault*******************");
@@ -65,11 +91,4 @@ void GPF(int errCode) {
 void PageFault(int errCode) {
   printf("\n******************PAGE FAULT*******************");
   printf("\nError Code: 0x%x", errCode);
-}
-
-// isr2
-void DebugException(int debugReg) {
-  printf("\n******************DEBUG EXCEPTION*******************");
-  // todo: push all debug regs and print
-  printf("\nDebug Register: 0x%x", debugReg);
 }
