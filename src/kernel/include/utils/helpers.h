@@ -3,3 +3,6 @@ void cause_divide_error();
 void cause_gpf();
 void cause_db();
 void cause_nmi();
+void cause_df();
+void cause_be();
+void cause_oe();

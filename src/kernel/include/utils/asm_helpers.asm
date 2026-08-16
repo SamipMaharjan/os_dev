@@ -7,6 +7,14 @@ cause_divide_error:
   div ebx
   ret
 
+; .cause_df_handler: 
+;   ; cause page fault
+;   mov eax, [0xFFFFFFFF] 
+
+global cause_df 
+cause_df:
+  call cause_divide_error
+
 global cause_gpf
 cause_gpf: 
   xor ax, ax
@@ -20,7 +28,6 @@ cause_pf:
 
 global cause_db
 cause_db: 
-  xchg bx, bx
   pushfd
   or dword [esp], 0x0100
   popfd
@@ -30,3 +37,19 @@ cause_db:
 global cause_nmi
 cause_nmi: 
   int 2
+  nop
+
+global cause_be
+cause_be: 
+  int3
+  ret
+
+global cause_oe
+cause_oe: 
+  xchg bx, bx
+  mov al, 127
+  add al, 1
+  into
+  nop
+  nop
+  ret
