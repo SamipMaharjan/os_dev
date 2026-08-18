@@ -73,7 +73,15 @@ void IDT_LIDT() {
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[8], (uint32_t)&double_fault, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[10], (uint32_t)&invalid_tss, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[11], (uint32_t)&segment_not_present, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[12], (uint32_t)&stack_segment_fault, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[13], (uint32_t)&general_protection_fault, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[16], (uint32_t)&floating_point_exception, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
 
   // USE LIDT instruction
@@ -146,8 +154,30 @@ void DoubleFault(uint32_t errorAddr, uint32_t segmentSelector,
                     eflags, segmentSelector, errorAddr, 0);
 }
 
+// isr10
+void InvalidTss(uint32_t errCode, uint32_t errorAddr, uint32_t segmentSelector,
+                uint32_t eflags) {
+  print_stack_frame("*******************INVALID TSS********************",
+                    eflags, segmentSelector, errorAddr, errCode);
+}
+
+// isr11
+void SegmentNotPresent(uint32_t errCode, uint32_t errorAddr,
+                       uint32_t segmentSelector, uint32_t eflags) {
+  print_stack_frame(
+      "*******************SEGMENT NOT PRESENT********************", eflags,
+      segmentSelector, errorAddr, errCode);
+}
+
+// isr12
+void StackSegmentFault(uint32_t errCode, uint32_t errorAddr,
+                       uint32_t segmentSelector, uint32_t eflags) {
+  print_stack_frame(
+      "*******************STACK SEGMENT FAULT********************", eflags,
+      segmentSelector, errorAddr, errCode);
+}
 // isr13
-void GeneralProtectionFault(int errCode, uint32_t errorAddr,
+void GeneralProtectionFault(uint32_t errCode, uint32_t errorAddr,
                             uint32_t segmentSelector, uint32_t eflags) {
   print_stack_frame(
       "*******************GENERAL PROTECTION FAULT********************", eflags,
@@ -158,4 +188,12 @@ void GeneralProtectionFault(int errCode, uint32_t errorAddr,
 void PageFault(int errCode) {
   printf("\n******************PAGE FAULT*******************");
   printf("\nError Code: 0x%x", errCode);
+}
+
+// isr16
+void FloatingPointException(uint32_t errCode, uint32_t errorAddr,
+                            uint32_t segmentSelector, uint32_t eflags) {
+  print_stack_frame(
+      "\n******************FLOATING POINT EXCEPTION*******************", eflags,
+      segmentSelector, errorAddr, errCode);
 }

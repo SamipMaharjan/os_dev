@@ -83,13 +83,37 @@ device_not_available:
 ; isr8
 global double_fault
 extern DoubleFault
-; DF_msg: db 0x0D, 0x0A, "*******************DOUBLE FAULT****************", 0
 double_fault: 
   ; push DF_msg
   ; call printf
   call DoubleFault
   jmp hang
 
+; isr10
+global invalid_tss
+extern InvalidTss
+invalid_tss: 
+  ; push DF_msg
+  ; call printf
+  call InvalidTss
+  jmp hang
+
+; isr11
+global segment_not_present
+extern SegmentNotPresent
+segment_not_present: 
+  call SegmentNotPresent
+  jmp hang
+
+
+; isr12
+global stack_segment_fault
+extern StackSegmentFault
+stack_segment_fault: 
+  call StackSegmentFault
+  jmp hang
+
+; isr 13
 global general_protection_fault
 extern GeneralProtectionFault
 GP_ErrCode: dd 0
@@ -129,6 +153,13 @@ page_fault:
   popad
   add esp, 4
   ; call PageFault
+  jmp hang
+
+; isr15
+global floating_point_exception
+extern FloatingPointException
+floating_point_exception: 
+  call FloatingPointException
   jmp hang
 
 hang:

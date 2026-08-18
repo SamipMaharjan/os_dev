@@ -81,4 +81,66 @@ cause_nm:
 .float_num
   dd 0x3f800000
       
+; this does not work
+global cause_ts
+cause_ts: 
+  mov eax, 0x99
+  ltr eax
+  nop
 
+; segment not present 
+; isr11
+global cause_np
+cause_np: 
+  xchg bx, bx
+  mov ax, 0x18
+  ; mov cs, ax
+  ; nop 
+  mov ds, ax
+  nop
+
+; isr12
+global cause_ss
+cause_ss: 
+  xchg bx, bx
+  mov ax, 0x18
+  ; mov cs, ax
+  ; nop 
+  mov ss , ax
+  nop
+
+; isr14
+global cause_mf
+cause_mf:
+    ; Enable native x87 exceptions: CR0.NE = 1
+    mov eax, cr0
+    or  eax, 0x20              ; CR0.NE = bit 5
+    mov cr0, eax
+
+    fninit
+
+    ; Get x87 control word
+    fnstcw [cw]
+
+    ; Unmask divide-by-zero
+    ; Control-word bit 2 = ZM
+    and word [cw], 0xFFFB      ; clear bit 2
+
+    fldcw [cw]
+                              
+                               ; Generate x87 divide-by-zero
+    fld1                       ; ST(0) = 1.0
+    fldz                       ; ST(0) = 0.0, ST(1) = 1.0
+    fdivp st1, st0             ; 1.0 / 0.0 -> #Z pending
+
+    xchg bx, bx
+    ; Force the pending exception to be delivered
+    fwait
+    nop 
+    nop
+
+    ; Should never reach here if #MF handler works
+    ret
+
+section .data
+cw: dw 0

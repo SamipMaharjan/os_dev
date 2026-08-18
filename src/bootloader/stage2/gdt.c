@@ -32,7 +32,16 @@ uint8_t GDT_Initialize() {
   GDT[2].Granularity = 0b11001111;
   GDT[2].SegmentBase3 = 0;
 
-  uint8_t gdt_size = sizeof(GDT_Entry) * 3;
+  // #NP Descriptor
+  // For cause_np routine
+  GDT[3].SegmentLimit = 0xFFFF;
+  GDT[3].SegmentBase1 = 0;
+  GDT[3].SegmentBase2 = 0;
+  GDT[3].AccessByte = 0b00010010;
+  GDT[3].Granularity = 0b11001111;
+  GDT[3].SegmentBase3 = 0;
+  uint8_t gdt_size = sizeof(GDT_Entry) * 4;
+
   uint8_t far *gdt_end = (uint8_t far *)((uint8_t far *)GDT + gdt_size);
 
   // The end of GDT will contain the GDT_Pointer table;

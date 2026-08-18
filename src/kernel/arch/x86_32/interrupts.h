@@ -9,3 +9,7 @@ void overflow_exception();
 void bound_range_exceeded();
 void invalid_opcode();
 void device_not_available();
+void invalid_tss();
+void segment_not_present();
+void stack_segment_fault();
+void floating_point_exception();

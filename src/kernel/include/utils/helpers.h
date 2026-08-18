@@ -9,3 +9,7 @@ void cause_oe();
 void cause_br();
 void cause_ud();
 void cause_nm();
+void cause_ts();
+void cause_np();
+void cause_ss();
+void cause_mf();

@@ -20,5 +20,5 @@ void kernel_main(void) {
 
   IDT_LIDT();
 
-  cause_nm();
+  cause_mf();
 }
