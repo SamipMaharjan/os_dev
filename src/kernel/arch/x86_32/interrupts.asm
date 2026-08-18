@@ -58,7 +58,7 @@ extern OverflowException
 overflow_exception: 
   call OverflowException
   xchg bx, bx
-  iret
+  jmp hang
 
 
 ; isr8

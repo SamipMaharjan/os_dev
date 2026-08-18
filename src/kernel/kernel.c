@@ -16,6 +16,9 @@ void kernel_main(void) {
   printf("\nHello world from stdio with hex %llx", 0xdeadbeeffeebdead);
   printf("\nHello world from stdio with hex %llx", 0xdeadbeeffeebdead);
   printf("\nHello world from stdio with hex %llx", 0xdeadbeeffeebdead);
+  printf("\nhello world");
+  IDT_LIDT();
+
   // printf("\nHello world from stdio with hex %lx", cause_divide_error);
   // uint32_t a = 0xFFFFEEEE;
   // uint16_t b = a;
@@ -24,10 +27,10 @@ void kernel_main(void) {
   // printf("\n print b %x", b);
   // printf("\n print ubo %x", upperBitsOffset);
 
-  IDT_LIDT();
-  //
-  // breakpoint();
+  // //
+  breakpoint();
   // printf("\nbefore cauoe");
   cause_oe();
-  // breakpoint();
+  breakpoint();
+  // //
 }

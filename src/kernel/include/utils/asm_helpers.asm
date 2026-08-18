@@ -46,10 +46,9 @@ cause_be:
 
 global cause_oe
 cause_oe: 
-  xchg bx, bx
   mov al, 127
   add al, 1
   into
   nop
   nop
-  ret
+  

@@ -39,11 +39,10 @@ static void set_idt_entry(Interrupt_Descriptor *curr_idt, uint32_t offset,
 static void print_stack_frame(char *exceptionName, uint32_t eflags,
                               uint32_t segmentSelector, uint32_t errorAddr,
                               uint32_t errorCode) {
-  // printf("\nERROR ADDRESS: %x", errorAddr);
-  // printf("\n%s", exceptionName);
-  // printf("\nEFLAGS: %x", eflags);
-  // printf("\nSELECTOR: %x", segmentSelector);
-  printf("buffer");
+  printf("\n%s", exceptionName);
+  printf("\nEFLAGS: %x", eflags);
+  printf("\nSELECTOR: %x", segmentSelector);
+  printf("\nERROR ADDRESS: %x", errorAddr);
   if (errorCode != 0)
     printf("\n ERROR CODE: %x", errorCode);
 }
@@ -105,10 +104,11 @@ void NonMaskableInterrupt(uint32_t errorAddr, uint32_t segmentSelector,
 // isr4
 void OverflowException(uint32_t errorAddr, uint32_t segmentSelector,
                        uint32_t eflags) {
-  printf("\n\rtest here too");
+  // printf("\n\rtest here too");
   print_stack_frame(
       "*******************OVERFLOW  EXCEPTION********************", eflags,
       segmentSelector, errorAddr, 0);
+  // printf("\n sff");
 }
 
 // isr8
