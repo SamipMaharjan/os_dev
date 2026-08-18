@@ -65,7 +65,11 @@ void IDT_LIDT() {
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[4], (uint32_t)&overflow_exception, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
-  set_idt_entry(&idt[5], (uint32_t)&overflow_exception, CODE_DESC,
+  set_idt_entry(&idt[5], (uint32_t)&bound_range_exceeded, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[6], (uint32_t)&invalid_opcode, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[7], (uint32_t)&device_not_available, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[8], (uint32_t)&double_fault, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
@@ -117,6 +121,22 @@ void BoundRangeExceeded(uint32_t errorAddr, uint32_t segmentSelector,
   print_stack_frame(
       "*******************BOUND RANGE EXCCEEDED********************", eflags,
       segmentSelector, errorAddr, 0);
+}
+
+// isr6
+void InvalidOpcode(uint32_t errorAddr, uint32_t segmentSelector,
+                   uint32_t eflags) {
+  print_stack_frame("*******************INVALID OPCODE********************",
+                    eflags, segmentSelector, errorAddr, 0);
+}
+
+// isr7
+void DeviceNotAvailable(uint32_t errorAddr, uint32_t segmentSelector,
+                        uint32_t eflags) {
+  print_stack_frame(
+      "*******************DEVICE NOT AVAILABLE******************** \n Trying "
+      "to exceute FPU instruction when CR0.TS = 1",
+      eflags, segmentSelector, errorAddr, 0);
 }
 
 // isr8

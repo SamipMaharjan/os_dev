@@ -66,6 +66,19 @@ bound_range_exceeded:
   call BoundRangeExceeded
   jmp hang
 
+; isr6
+global invalid_opcode
+extern InvalidOpcode
+invalid_opcode: 
+  call InvalidOpcode
+  jmp hang
+
+; isr7
+global device_not_available
+extern DeviceNotAvailable
+device_not_available: 
+  call DeviceNotAvailable
+  jmp hang
 
 ; isr8
 global double_fault

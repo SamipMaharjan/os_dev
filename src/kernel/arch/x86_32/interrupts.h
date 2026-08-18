@@ -6,3 +6,6 @@ void general_protection_fault();
 void nmi();
 void breakpoint_exception();
 void overflow_exception();
+void bound_range_exceeded();
+void invalid_opcode();
+void device_not_available();

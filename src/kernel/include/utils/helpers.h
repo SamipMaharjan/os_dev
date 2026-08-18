@@ -6,3 +6,6 @@ void cause_nmi();
 void cause_df();
 void cause_be();
 void cause_oe();
+void cause_br();
+void cause_ud();
+void cause_nm();

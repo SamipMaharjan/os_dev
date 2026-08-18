@@ -56,7 +56,29 @@ global cause_br
 cause_br: 
   mov ax, 10
   bound ax, [.bound]
-
 .bound: 
   dd 0
   dd 5
+
+; cause invalid opcode exception
+global cause_ud 
+cause_ud:
+    db 0x0F, 0x0B       ; UD2
+    nop
+
+; cause device not available
+global cause_nm
+cause_nm: 
+  xchg bx, bx
+  mov eax, cr0
+  or eax, 0b1000  ; set Task Switch flag to 1
+                  ; CPU turns it on automatically when 
+                  ; hardware/software taskswtich happens
+  mov cr0, eax
+
+  fld dword [.float_num]
+  nop
+.float_num
+  dd 0x3f800000
+      
+
