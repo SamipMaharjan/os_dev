@@ -22,7 +22,9 @@ void serial_init(void) {
   outb(COM1 + 4, 0x0B); // IRQs enabled, RTS/DSR set
 }
 
-int serial_is_transmit_empty(void) { return inb(COM1 + 5) & 0x20; }
+int serial_is_transmit_empty(void) {
+  return (inb(COM1 + 5) & 0x60) == 0x60; // THRE (0x20) AND TEMT (0x40)
+}
 
 void serial_putchar(char c) {
   while (!serial_is_transmit_empty())

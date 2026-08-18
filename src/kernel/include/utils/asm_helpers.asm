@@ -51,4 +51,12 @@ cause_oe:
   into
   nop
   nop
-  
+
+global cause_br 
+cause_br: 
+  mov ax, 10
+  bound ax, [.bound]
+
+.bound: 
+  dd 0
+  dd 5

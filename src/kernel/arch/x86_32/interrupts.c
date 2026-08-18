@@ -65,6 +65,8 @@ void IDT_LIDT() {
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[4], (uint32_t)&overflow_exception, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[5], (uint32_t)&overflow_exception, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[8], (uint32_t)&double_fault, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[13], (uint32_t)&general_protection_fault, CODE_DESC,
@@ -105,10 +107,16 @@ void NonMaskableInterrupt(uint32_t errorAddr, uint32_t segmentSelector,
 void OverflowException(uint32_t errorAddr, uint32_t segmentSelector,
                        uint32_t eflags) {
   // printf("\n\rtest here too");
+  print_stack_frame("*******************OVERFLOW EXCEPTION********************",
+                    eflags, segmentSelector, errorAddr, 0);
+}
+
+// isr5
+void BoundRangeExceeded(uint32_t errorAddr, uint32_t segmentSelector,
+                        uint32_t eflags) {
   print_stack_frame(
-      "*******************OVERFLOW  EXCEPTION********************", eflags,
+      "*******************BOUND RANGE EXCCEEDED********************", eflags,
       segmentSelector, errorAddr, 0);
-  // printf("\n sff");
 }
 
 // isr8

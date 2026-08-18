@@ -57,7 +57,13 @@ global overflow_exception
 extern OverflowException
 overflow_exception: 
   call OverflowException
-  xchg bx, bx
+  jmp hang
+
+; isr5
+global bound_range_exceeded
+extern BoundRangeExceeded
+bound_range_exceeded: 
+  call BoundRangeExceeded
   jmp hang
 
 
