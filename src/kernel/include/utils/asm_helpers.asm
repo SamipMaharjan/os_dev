@@ -169,3 +169,18 @@ global cause_cp
 cause_cp: 
   int 0x15
   nop 
+
+global cause_hv
+cause_hv: 
+  int 0x1c
+  nop 
+
+global cause_vc
+cause_vc: 
+  int 0x1d
+  nop 
+
+global cause_sx
+cause_sx: 
+  int 0x1e
+  nop 

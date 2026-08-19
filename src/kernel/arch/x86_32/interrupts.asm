@@ -197,6 +197,28 @@ control_protection_exception:
   call ControlProtectionException
   jmp hang
 
+; isr28
+global hypervisor_injection_exception
+extern HypervisorInjectionException
+hypervisor_injection_exception: 
+  call HypervisorInjectionException
+  jmp hang
+ 
+; isr30
+global vmm_communication_exception
+extern VmmCommunicationException
+vmm_communication_exception: 
+  call VmmCommunicationException
+  jmp hang
+
+; isr30
+global security_exception
+extern SecurityException
+security_exception: 
+  call SecurityException
+  jmp hang
+
+
 hang:
   cli
   hlt

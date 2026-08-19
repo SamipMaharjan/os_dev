@@ -93,6 +93,12 @@ void IDT_LIDT() {
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[21], (uint32_t)&control_protection_exception, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[28], (uint32_t)&hypervisor_injection_exception, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[29], (uint32_t)&vmm_communication_exception, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[30], (uint32_t)&security_exception, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
 
   // USE LIDT instruction
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));
@@ -241,5 +247,27 @@ void ControlProtectionException(uint32_t errorAddr, uint32_t segmentSelector,
                                 uint32_t eflags) {
   print_stack_frame(
       "\n******************CONTROL PROTECTION EXCEPTION******************",
+      eflags, segmentSelector, errorAddr, errorAddr);
+}
+
+// isr28
+void HypervisorInjectionException(uint32_t errorAddr, uint32_t segmentSelector,
+                                  uint32_t eflags) {
+  print_stack_frame(
+      "\n******************HYPERVISOR INJECTION EXCEPTION******************",
       eflags, segmentSelector, errorAddr, 0);
+}
+
+// isr29
+void VmmCommunicationException(uint32_t errorAddr, uint32_t segmentSelector,
+                               uint32_t eflags) {
+  print_stack_frame(
+      "\n******************VMM COMMUNICATION EXCEPTION******************",
+      eflags, segmentSelector, errorAddr, errorAddr);
+}
+// isr30
+void SecurityException(uint32_t errorAddr, uint32_t segmentSelector,
+                       uint32_t eflags) {
+  print_stack_frame("\n******************SECURITY EXCEPTION******************",
+                    eflags, segmentSelector, errorAddr, errorAddr);
 }

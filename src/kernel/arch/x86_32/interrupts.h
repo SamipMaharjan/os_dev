@@ -18,3 +18,6 @@ void machine_check();
 void sse_avx_fp_exception();
 void virtualization_exception();
 void control_protection_exception();
+void hypervisor_injection_exception();
+void security_exception();
+void vmm_communication_exception();

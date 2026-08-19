@@ -20,5 +20,5 @@ void kernel_main(void) {
 
   IDT_LIDT();
 
-  cause_cp();
+  cause_vc();
 }

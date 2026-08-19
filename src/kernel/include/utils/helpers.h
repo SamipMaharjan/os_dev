@@ -18,3 +18,6 @@ void cause_mc();
 void cause_xm_xf();
 void cause_ve();
 void cause_cp();
+void cause_hv();
+void cause_sx();
+void cause_vc();
