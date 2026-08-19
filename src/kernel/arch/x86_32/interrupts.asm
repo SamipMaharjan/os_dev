@@ -162,6 +162,20 @@ floating_point_exception:
   call FloatingPointException
   jmp hang
 
+; isr16
+global alignment_check
+extern AlignmentCheck
+alignment_check: 
+  call AlignmentCheck
+  jmp hang
+
+; isr17
+global machine_check
+extern MachineCheck
+machine_check: 
+  call MachineCheck
+  jmp hang
+
 hang:
   cli
   hlt

@@ -144,3 +144,14 @@ cause_mf:
 
 section .data
 cw: dw 0
+
+global cause_ac 
+cause_ac: 
+  int 0x11 
+  nop
+
+global cause_mc 
+cause_mc:
+  int 0x12 
+  nop
+  

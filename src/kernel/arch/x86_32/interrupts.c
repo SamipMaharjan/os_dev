@@ -83,6 +83,10 @@ void IDT_LIDT() {
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[16], (uint32_t)&floating_point_exception, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[17], (uint32_t)&alignment_check, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[18], (uint32_t)&machine_check, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
 
   // USE LIDT instruction
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));
@@ -191,9 +195,22 @@ void PageFault(int errCode) {
 }
 
 // isr16
-void FloatingPointException(uint32_t errCode, uint32_t errorAddr,
-                            uint32_t segmentSelector, uint32_t eflags) {
+void FloatingPointException(uint32_t errorAddr, uint32_t segmentSelector,
+                            uint32_t eflags) {
   print_stack_frame(
       "\n******************FLOATING POINT EXCEPTION*******************", eflags,
-      segmentSelector, errorAddr, errCode);
+      segmentSelector, errorAddr, 0);
+}
+
+// isr17
+void AlignmentCheck(uint32_t errorAddr, uint32_t segmentSelector,
+                    uint32_t eflags) {
+  print_stack_frame("\n******************ALIGNMENT CHECK*******************",
+                    eflags, segmentSelector, errorAddr, 0);
+}
+// isr18
+void MachineCheck(uint32_t errorAddr, uint32_t segmentSelector,
+                  uint32_t eflags) {
+  print_stack_frame("\n******************MACHINE CHECK*******************",
+                    eflags, segmentSelector, errorAddr, 0);
 }
