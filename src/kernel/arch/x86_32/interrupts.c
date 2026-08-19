@@ -87,6 +87,12 @@ void IDT_LIDT() {
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[18], (uint32_t)&machine_check, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[19], (uint32_t)&sse_avx_fp_exception, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[20], (uint32_t)&virtualization_exception, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[21], (uint32_t)&control_protection_exception, CODE_DESC,
+                EXCEPTION_TYPE_ATTRIBUTE);
 
   // USE LIDT instruction
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));
@@ -213,4 +219,27 @@ void MachineCheck(uint32_t errorAddr, uint32_t segmentSelector,
                   uint32_t eflags) {
   print_stack_frame("\n******************MACHINE CHECK*******************",
                     eflags, segmentSelector, errorAddr, 0);
+}
+// isr19
+void SseAvxFpException(uint32_t errorAddr, uint32_t segmentSelector,
+                       uint32_t eflags) {
+  print_stack_frame("\n******************SSE/AVX FLOATING POINT "
+                    "EXCEPTION*******************",
+                    eflags, segmentSelector, errorAddr, 0);
+}
+
+// isr20
+void VirtualizationException(uint32_t errorAddr, uint32_t segmentSelector,
+                             uint32_t eflags) {
+  print_stack_frame(
+      "\n******************VIRTUALIZATION EXCEPTION*******************", eflags,
+      segmentSelector, errorAddr, 0);
+}
+
+// isr21
+void ControlProtectionException(uint32_t errorAddr, uint32_t segmentSelector,
+                                uint32_t eflags) {
+  print_stack_frame(
+      "\n******************CONTROL PROTECTION EXCEPTION******************",
+      eflags, segmentSelector, errorAddr, 0);
 }

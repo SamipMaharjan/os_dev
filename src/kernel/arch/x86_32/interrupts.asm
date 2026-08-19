@@ -155,25 +155,46 @@ page_fault:
   ; call PageFault
   jmp hang
 
-; isr15
+; isr16
 global floating_point_exception
 extern FloatingPointException
 floating_point_exception: 
   call FloatingPointException
   jmp hang
 
-; isr16
+; isr17
 global alignment_check
 extern AlignmentCheck
 alignment_check: 
   call AlignmentCheck
   jmp hang
 
-; isr17
+; isr18
 global machine_check
 extern MachineCheck
 machine_check: 
   call MachineCheck
+  jmp hang
+
+; isr19
+global sse_avx_fp_exception
+extern SseAvxFpException
+sse_avx_fp_exception: 
+  call SseAvxFpException
+  jmp hang
+
+; isr20
+global virtualization_exception
+extern VirtualizationException
+virtualization_exception: 
+  call VirtualizationException
+  jmp hang
+
+; isr21
+global control_protection_exception
+extern ControlProtectionException
+control_protection_exception: 
+  call ControlProtectionException
   jmp hang
 
 hang:

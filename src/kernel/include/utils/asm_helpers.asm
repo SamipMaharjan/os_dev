@@ -155,3 +155,17 @@ cause_mc:
   int 0x12 
   nop
   
+global cause_xm_xf
+cause_xm_xf:
+  int 0x13 
+  nop
+
+global cause_ve
+cause_ve: 
+  int 0x14
+  nop 
+
+global cause_cp
+cause_cp: 
+  int 0x15
+  nop 

@@ -15,3 +15,6 @@ void stack_segment_fault();
 void floating_point_exception();
 void alignment_check();
 void machine_check();
+void sse_avx_fp_exception();
+void virtualization_exception();
+void control_protection_exception();
