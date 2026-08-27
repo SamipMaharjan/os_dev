@@ -1,4 +1,5 @@
 #include "arch/x86_32/interrupts.h"
+#include "arch/x86_32/pic.h"
 #include "arch/x86_32/serial_port.h"
 #include "arch/x86_32/vga.h"
 #include "stdio.h"
@@ -19,6 +20,5 @@ void kernel_main(void) {
   printf("\nHello world");
 
   IDT_LIDT();
-
-  cause_vc();
+  PIC_sendEOI(8);
 }
