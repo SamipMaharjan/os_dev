@@ -20,5 +20,7 @@ void kernel_main(void) {
   printf("\nHello world");
 
   IDT_LIDT();
-  PIC_sendEOI(8);
+  breakpoint();
+  printf("\nHello world after breakpoint");
+  PIC_remap(0x20, 0x28);
 }
