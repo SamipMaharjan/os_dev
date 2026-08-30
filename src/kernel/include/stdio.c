@@ -241,3 +241,8 @@ void printf(const char *fmt, ...) {
     fmt++;
   }
 }
+
+void initOutputDevices() {
+  serial_init();
+  terminal_initialize();
+}

@@ -218,7 +218,21 @@ security_exception:
   call SecurityException
   jmp hang
 
+; isr32
+global timer_interrupt
+extern TimerInterrupt
+timer_interrupt: 
+  call TimerInterrupt
+  iret
 
+; isr33
+global keyboard_interrupt
+extern KeyboardInterrupt
+keyboard_interrupt: 
+  xchg bx, bx
+  call KeyboardInterrupt
+  iret
+  ; jmp hang
 hang:
   cli
   hlt

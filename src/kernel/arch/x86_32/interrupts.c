@@ -1,9 +1,7 @@
 #include "interrupts.h"
 #include "serial_port.h"
-#include "stdio.h"
 #include "utils/helpers.h"
 #include "vga.h"
-#include <stdint.h>
 
 typedef struct {
   uint16_t limit;
@@ -36,16 +34,16 @@ static void set_idt_entry(Interrupt_Descriptor *curr_idt, uint32_t offset,
   curr_idt->selector = selector;
   curr_idt->type_attributes = type_attributes;
 }
-static void print_stack_frame(char *exceptionName, uint32_t eflags,
-                              uint32_t segmentSelector, uint32_t errorAddr,
-                              uint32_t errorCode) {
-  printf("\n%s", exceptionName);
-  printf("\nEFLAGS: %x", eflags);
-  printf("\nSELECTOR: %x", segmentSelector);
-  printf("\nERROR ADDRESS: %x", errorAddr);
-  if (errorCode != 0)
-    printf("\n ERROR CODE: %x", errorCode);
-}
+// static void print_stack_frame(char *exceptionName, uint32_t eflags,
+//                               uint32_t segmentSelector, uint32_t errorAddr,
+//                               uint32_t errorCode) {
+//   printf("\n%s", exceptionName);
+//   printf("\nEFLAGS: %x", eflags);
+//   printf("\nSELECTOR: %x", segmentSelector);
+//   printf("\nERROR ADDRESS: %x", errorAddr);
+//   if (errorCode != 0)
+//     printf("\n ERROR CODE: %x", errorCode);
+// }
 
 void IDT_LIDT() {
   idtr.base = (uint32_t)idt;
@@ -99,6 +97,12 @@ void IDT_LIDT() {
                 EXCEPTION_TYPE_ATTRIBUTE);
   set_idt_entry(&idt[30], (uint32_t)&security_exception, CODE_DESC,
                 EXCEPTION_TYPE_ATTRIBUTE);
+
+  // IRQs
+  set_idt_entry(&idt[32], (uint32_t)&timer_interrupt, CODE_DESC,
+                INTERRUPT_TYPE_ATTRIBUTE);
+  set_idt_entry(&idt[33], (uint32_t)&keyboard_interrupt, CODE_DESC,
+                INTERRUPT_TYPE_ATTRIBUTE);
 
   // USE LIDT instruction
   __asm__ volatile("lidt (%0)" : : "r"(&idtr));

@@ -50,4 +50,4 @@ always:
 	# mkdir -p $(BUILD_DIR)/kernel/c/include/utils
 
 clean: 
-	rm -f $(BUILD_DIR)/kernel.elf
+	rm-f $(BUILD_DIR)/kernel.elf

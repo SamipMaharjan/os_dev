@@ -1,4 +1,5 @@
 void breakpoint();
+void halt();
 void cause_divide_error();
 void cause_gpf();
 void cause_db();

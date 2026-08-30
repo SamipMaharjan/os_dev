@@ -389,7 +389,7 @@ _x86_Enable_A20:
 
         call    wait_input
 	      popa
-        sti
+    sti
     ; restore old call frame
     mov sp, bp
     pop bp

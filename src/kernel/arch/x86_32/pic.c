@@ -56,8 +56,8 @@ void PIC_remap(int offset1, int offset2) {
                                // where 1 represents a slave pic attachment
   io_wait();
 
-  outb(PIC2_DATA, 0x28); // ICW3 in slave is just a number which tells the
-                         // line index of master its attached to
+  outb(PIC2_DATA, 0x2); // ICW3 in slave is just a number which tells the
+                        // line index of master its attached to
   io_wait();
 
   // 4th ICW: tell the pic if its 8080 mode or 8086 mode
@@ -69,6 +69,11 @@ void PIC_remap(int offset1, int offset2) {
   // Unmask the PIC
   outb(PIC1_DATA, 0);
   outb(PIC2_DATA, 0);
+
+  // Enable CPU interrupts
+  __asm__ volatile("sti");
+
+  PIC_sendEOI(0);
 }
 void PIC_disable() {
   outb(PIC1_DATA, 0xff);
@@ -99,6 +104,8 @@ void IRQ_clear_mask(uint8_t irq_line) {
   value = inb(port) & ~(1 << irq_line);
   outb(port, value);
 }
+
+uint16_t pic_get_imr() { return inb(PIC2_DATA) << 8 | inb(PIC1_DATA); }
 
 uint16_t pic_get_irr() {
   // select the IRR register
