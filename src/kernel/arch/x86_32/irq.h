@@ -1,0 +1,2 @@
+void KeyboardInterrupt();
+void TimerInterrupt();
