@@ -79,7 +79,7 @@ void PIC_disable() {
   outb(PIC1_DATA, 0xff);
   outb(PIC2_DATA, 0xff);
 }
-void IRQ_set_mask(uint8_t irq_line) {
+void PIC_set_mask(uint8_t irq_line) {
   uint8_t port;
   uint8_t value = 0;
   if (irq_line < 8)
@@ -92,7 +92,7 @@ void IRQ_set_mask(uint8_t irq_line) {
   outb(port, value);
 }
 
-void IRQ_clear_mask(uint8_t irq_line) {
+void PIC_clear_mask(uint8_t irq_line) {
   uint8_t port;
   uint8_t value = 0;
   if (irq_line < 8)

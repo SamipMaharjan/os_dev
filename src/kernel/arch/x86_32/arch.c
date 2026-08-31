@@ -1,6 +1,6 @@
-
 #include "interrupts.h"
 #include "pic.h"
+#include "ps2_8042.h"
 #include "serial_port.h"
 #include "vga.h"
 
@@ -16,4 +16,9 @@ void arch_init() {
   PIC_remap(PIC1_OFFSET, PIC2_OFFSET);
   uint16_t imr = pic_get_imr();
   printf("\nIMR value : %d\r\n", imr);
+
+  // disable timer interrupt for now.
+  PIC_set_mask(0);
+
+  PS2_Init();
 }
