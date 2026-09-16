@@ -20,7 +20,10 @@
 // 0x00040000 - 0x00040100 - GDT
 #define GDT_BASE ((void far *)0x40000000)
 
-// 0x00040500 - 0x00040100 - GDT
+// 0x00040500 - 0x???????? - Memory Map of INT 0x15 and the length of them
+// first 4 bytes = length of the entry
+// offset 4 - rest = actual entries
+#define MEMORY_MAP_BIOS ((void far *)0x40000500)
 
 // 0x00080000 - 0x0009FFFF - Extended BIOS data area
 // 0x000A0000 - 0x000C7FFF - Video

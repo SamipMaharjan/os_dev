@@ -345,7 +345,6 @@ _x86_Set_GDTR:
     pop ds
     popa
     sti
-    ; ret
 
     ; restore old call frame
     mov sp, bp

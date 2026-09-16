@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 void kernel_main(void) {
+  // have to get the memory mappings from the stage2's buffer address.
   arch_init();
 
   // printf("Hello world from stdio with numbers %d \n", 14);

@@ -8,7 +8,7 @@ void far *memcpy(void far *dst, const void far *src, uint16_t num) {
 
   // printf("\r\n  destination far %lx", u8Dst);
   // printf("\r\n  destination %x", u8Dst);
-  //
+  // memory.h
   // printf("\r\n  srouce far %lx", u8Src);
   // printf("\r\n  source %x", u8Src);
   //
@@ -37,4 +37,10 @@ int memcmp(const void far *ptr1, const void far *ptr2, uint16_t num) {
       return 1;
 
   return 0;
+}
+
+void memmap(void far *outBuffer) {
+  // First 4 bytes contains the number of total entries.
+  // outBuffer = (void far *)((uint32_t)outBuffer + 4);
+  x86_Map_Memory(outBuffer);
 }

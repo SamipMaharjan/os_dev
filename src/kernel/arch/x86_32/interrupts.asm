@@ -229,7 +229,6 @@ timer_interrupt:
 global keyboard_interrupt
 extern KeyboardInterrupt
 keyboard_interrupt: 
-  xchg bx, bx
   call KeyboardInterrupt
   iret
   ; jmp hang

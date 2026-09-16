@@ -5,12 +5,16 @@
 #include "fat.h"
 #include "gdt.h"
 #include "memdefs.h"
+#include "memory.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "utility.h"
 #include "x86.h"
 
 void _cdecl cstart_(uint16_t bootDrive) {
+  printf("Start of Memory Mapping using bios \r\n");
+  memmap(MEMORY_MAP_BIOS);
+  printf("End of Memory Mapping using bios \r\n");
 
   DISK disk;
   if (!DISK_Initialize(&disk, bootDrive)) {
