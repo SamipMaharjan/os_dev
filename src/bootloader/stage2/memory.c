@@ -40,7 +40,6 @@ int memcmp(const void far *ptr1, const void far *ptr2, uint16_t num) {
 }
 
 void memmap(void far *outBuffer) {
-  // First 4 bytes contains the number of total entries.
   // outBuffer = (void far *)((uint32_t)outBuffer + 4);
   x86_Map_Memory(outBuffer);
 }
