@@ -16,7 +16,8 @@ SECTIONS
 	   address, in order to give the loader freedom in selecting a span of
 	   memory which is verified to be available by the firmware, in order to
 	   work around this issue. This does not use that feature, so 2M was
-	   chosen as a safer option than the traditional 1M. */
+	   chosen as a safer option than the traditional 1M. But I will use 1M as 
+     i am using BIOS*/
 	. = 1M;
 
 	/* First put the multiboot header, as it is required to be put very early
@@ -46,6 +47,9 @@ SECTIONS
 		*(COMMON)
 		*(.bss)
 	}
+  /* Put the address of end of the kernel to kernel_end variable */
+ . = ALIGN(4K);
+    kernel_end = .;
 
 	/* The compiler may produce other sections, by default it will put them in
 	   a segment with the same name. Simply add stuff here as needed. */

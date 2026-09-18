@@ -1,5 +1,5 @@
 #include "arch.h"
-#include "arch/x86_32/memory.h"
+#include "arch/x86_32/pmm.h"
 #include "stdio.h"
 #include "utils/helpers.h"
 #include <stdbool.h>
@@ -9,6 +9,7 @@ void kernel_main(void) {
   // have to get the memory mappings from the stage2's buffer address.
   arch_init();
   get_memory_map();
+  pmm_init();
 
   // printf("Hello world from stdio with numbers %d \n", 14);
   // printf("Hello world from stdio with string %s \n", "the string");
