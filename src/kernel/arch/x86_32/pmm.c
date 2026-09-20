@@ -23,10 +23,23 @@ extern void *kernel_end;
 #define BITMAP_WIDTH 32    // 32-bits per bitmap entry
 
 MemoryMap *memoryMap = MEMORY_MAP_ADDR;
+uint32_t search_start = 0;
 
 uint32_t *bitmap = (uint32_t *)&kernel_end;
 
-void get_memory_map() {
+void page_to_bitmap(uint32_t page, uint32_t *arrayElement,
+                    uint32_t *bitPosition) {
+  *arrayElement = page / 32;
+  *bitPosition = page % 32;
+}
+
+void addr_to_bitmap(uint64_t physical_addr, uint32_t *arrayElement,
+                    uint32_t *bitPosition) {
+  uint32_t page = physical_addr / PAGE_SIZE;
+  page_to_bitmap(page, arrayElement, bitPosition);
+}
+
+void print_memory_map() {
   printf("\nAccessing memory mapp");
 
   printf("\nLength: %d", memoryMap->length);
@@ -41,6 +54,11 @@ void get_memory_map() {
     printf("\nattribute: %d", Entry.Attributes);
   }
 }
+
+void pmm_alloc(uint32_t pages) {
+
+};
+
 void pmm_init() {
   MemoryMapEntry *highestEntry = &memoryMap->entry[0];
 
@@ -68,19 +86,6 @@ void pmm_init() {
   }
 
   // Mark the pages used by stage2, Kernel
-
   printf("\n Total Memory : %lld", totalMemory);
   printf("\n Kernel_End: %d", bitmap);
-}
-
-void page_to_bitmap(uint32_t page, uint32_t *arrayElement,
-                    uint32_t *bitPosition) {
-  *arrayElement = page / 32;
-  *bitPosition = page % 32;
-}
-
-void physical_addr_to_bitmap(uint64_t physical_addr, uint32_t *arrayElement,
-                             uint32_t *bitPosition) {
-  uint32_t page = physical_addr / PAGE_SIZE;
-  page_to_bitmap(page, arrayElement, bitPosition);
 }
