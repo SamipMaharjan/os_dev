@@ -19,6 +19,7 @@ void kernel_main(void) {
   // printf("\nHello world from stdio with hex %llx", 0xdeadbeeffeebdead);
   // printf("\nHello world from stdio with hex %llx", 0xdeadbeeffeebdead);
   // printf("\nHello world");
+  // breakpoint();
 
   while (true) {
     halt();

@@ -32,4 +32,7 @@
 // 0x000F4240
 //
 // 0x00100000 - 0x001114095 - Kernel32
-#define MEMORY_PARSED_KERNEL ((void far *)0xFFFF0010) // results to 0x00100000
+#define MEMORY_PARSED_KERNEL                                                   \
+  ((void far *)0xFFFF0010) // results to 0x00100000
+                           // or 1048576 in decimal
+                           // its the 1MB mark

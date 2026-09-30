@@ -16,7 +16,8 @@ A hobby x86 operating system written from scratch in **C and x86 Assembly**, foc
 Requires:
 
 * NASM
-* `i686-elf-gcc`
+* wcc (Real Mode cross compiler) 
+* `i686-elf-gcc` (Protected Mode cross compiler)
 * QEMU / Bochs
 
 
