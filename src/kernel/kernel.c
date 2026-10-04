@@ -1,5 +1,5 @@
 #include "arch.h"
-#include "arch/x86_32/pmm.h"
+#include "mm/pmm.h"
 #include "stdio.h"
 #include "utils/helpers.h"
 #include <stdbool.h>
