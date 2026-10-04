@@ -24,10 +24,10 @@ extern void *kernel_end;
 #define PAGE_SIZE 4096  // 4KB page frame
 #define BITMAP_WIDTH 32 // 32-bits per bitmap entry
 #define KERNEL_START 1048576
-#define UINT32_MAX 0xFFFFFFFFu
-MemoryMap *memoryMap = MEMORY_MAP_ADDR;
+
 uint32_t search_start = 0;
 
+MemoryMap *memoryMap = MEMORY_MAP_ADDR;
 uint32_t *bitmap = (uint32_t *)&kernel_end;
 
 void page_to_bitmap(uint32_t page, uint32_t *bitmap_Y, uint32_t *bitmap_X) {
@@ -90,14 +90,14 @@ void pmm_alloc_many(uint64_t addr, uint64_t len_in_bytes) {
 
   if (isOverflow) {
     uint32_t bitmap_operand = UINT32_MAX << bitmap_X;
-    bitmap[bitmap_Y] = bitmap[bitmap_Y] & bitmap_operand;
+    bitmap[bitmap_Y] = bitmap[bitmap_Y] | bitmap_operand;
+    remaining_pages -= usable_frames;
   } else {
     uint32_t bitmap_operand = (UINT32_MAX << bitmap_X) &
                               UINT32_MAX >> (32 - (bitmap_X + remaining_pages));
-    bitmap[bitmap_Y] = bitmap[bitmap_Y] & bitmap_operand;
+    bitmap[bitmap_Y] = bitmap[bitmap_Y] | bitmap_operand;
+    remaining_pages = 0;
   }
-
-  remaining_pages -= usable_frames;
 
   uint32_t current_Y = bitmap_Y + 1;
   while (remaining_pages > 0) {
@@ -112,13 +112,21 @@ void pmm_alloc_many(uint64_t addr, uint64_t len_in_bytes) {
     }
   }
 };
+
 void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
+  // if addr not page aligned make it
+  if (addr % PAGE_SIZE != 0) {
+    addr = addr + (addr % PAGE_SIZE);
+  }
   uint32_t bitmap_Y;
   uint32_t bitmap_X;
   addr_to_bitmap(addr, &bitmap_Y, &bitmap_X);
 
   // Remaining pages to allocate
-  uint32_t remaining_pages = memLength_to_pgLength(len_in_bytes);
+  // Not using memLength_to_pgLength as
+  // the value needs to be floored when length is not
+  // page aligned
+  uint32_t remaining_pages = len_in_bytes / PAGE_SIZE;
 
   // usable frames for first slot as bitmap_X is dynamic
   uint8_t usable_frames = 32 - bitmap_X;
@@ -129,13 +137,13 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
   if (isOverflow) {
     uint32_t bitmap_operand = (1U << bitmap_X) - 1;
     bitmap[bitmap_Y] = bitmap[bitmap_Y] & bitmap_operand;
+    remaining_pages -= usable_frames;
   } else {
     uint32_t bitmap_operand =
         ((1U << bitmap_X) - 1) | (UINT32_MAX << (bitmap_X + remaining_pages));
     bitmap[bitmap_Y] = bitmap[bitmap_Y] & bitmap_operand;
+    remaining_pages = 0;
   }
-
-  remaining_pages -= usable_frames;
 
   uint32_t current_Y = bitmap_Y + 1;
   while (remaining_pages > 0) {
@@ -149,7 +157,6 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
       remaining_pages = 0;
     }
   }
-  // bitmap[bitmap_Y] = ((1U << bitmap_X) - 1) & bitmap[bitmap_Y];
 };
 
 void pmm_init() {
@@ -163,7 +170,11 @@ void pmm_init() {
   }
   uint64_t totalMemory = highestEntry->BaseAddr + highestEntry->Length;
   uint32_t totalPages = totalMemory / PAGE_SIZE;
+
+  // todo: handle the case when remainder remains.
   uint32_t bitmapLength = totalPages / BITMAP_WIDTH;
+
+  uint32_t bitmap_size = bitmapLength * 4; // each entry is 4 bytes / 32 bits
 
   // Mark all frames as used
   for (uint32_t i = 0; i < bitmapLength; i++) {
@@ -171,48 +182,24 @@ void pmm_init() {
     bitmap[i] = UINT32_MAX;
   }
 
-  // Unmark the frames based on E820
+  // Unmark the frames above 1MB based on E820
   for (uint32_t i = 0; i < memoryMap->length; i++) {
     MemoryMapEntry *Entry = &memoryMap->entry[i];
-
-    // keep memory below 1 mb reserved
     if (Entry->Type == USABLE && Entry->BaseAddr >= KERNEL_START) {
-      uint64_t usable_page_start = Entry->BaseAddr / PAGE_SIZE;
-      uint64_t usable_page_end =
-          usable_page_start + memLength_to_pgLength(Entry->Length);
-
-      printf("\n --- base addr: %lld", usable_page_start);
-      printf("\n --- length: %lld", usable_page_end);
-
-      for (uint64_t j = usable_page_start; j < usable_page_end; j += 32) {
-        // marks 32 pages as free
-        bitmap[j] = 0;
-      }
+      pmm_free_many(Entry->BaseAddr, Entry->Length);
     }
   }
 
-  // Mark the pages used by stage2, Kernel, bootloader and BIOS as reserved
-  uint64_t allocated_page_start = KERNEL_START / PAGE_SIZE;
-  uint32_t allocated_mem_length =
-      (uint64_t)&kernel_end + bitmapLength - KERNEL_START;
-  uint64_t allocated_page_length = memLength_to_pgLength(allocated_mem_length);
-  uint64_t allocated_page_end = allocated_page_start + allocated_page_length;
+  // Mark the pages used by Kernel as reserved
+  uint32_t kernel_to_bitmap_length =
+      (uint64_t)&kernel_end + bitmap_size - KERNEL_START;
+  pmm_alloc_many(KERNEL_START, kernel_to_bitmap_length);
 
-  printf("used p start and length , %lld , %lld", allocated_page_start,
-         allocated_page_length);
-
-  for (uint64_t i = allocated_page_start; i < allocated_page_end; i += 32) {
-    // marks 32 pages as used
-    bitmap[i] = UINT32_MAX;
-  }
-
-  printf("\n Total Memory : %lld", totalMemory);
-  printf("\n Kernel_End: %d", &kernel_end);
   printf("\n kend  + bitmap len: %lld",
-         0x100000 - ((uint64_t)&kernel_end + bitmapLength));
+         0x100000 - ((uint64_t)&kernel_end + bitmap_size));
   printf(
       "\n test + bitmap len: %lld",
-      memLength_to_pgLength(((uint64_t)&kernel_end + bitmapLength) - 0x100000));
+      memLength_to_pgLength(((uint64_t)&kernel_end + bitmap_size) - 0x100000));
 
   return;
 }
