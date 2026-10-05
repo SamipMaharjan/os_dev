@@ -26,6 +26,7 @@ extern void *kernel_end;
 #define KERNEL_START 1048576
 
 uint32_t search_start = 0;
+uint32_t bitmapLength;
 
 MemoryMap *memoryMap = MEMORY_MAP_ADDR;
 uint32_t *bitmap = (uint32_t *)&kernel_end;
@@ -66,12 +67,59 @@ void print_memory_map() {
   }
 }
 
-void pmm_alloc(uint32_t pages) {
-  bitmap[pages] = 1;
-  // print_memory_map();
-};
-void pmm_free(uint32_t frame) {
+uint32_t pmm_alloc() {
+  uint32_t current_entry = search_start;
 
+  for (uint32_t i = 0; i < bitmapLength; i++) {
+    if (current_entry >= bitmapLength) {
+      current_entry = 0;
+    }
+    if (bitmap[current_entry] != UINT32_MAX) {
+      uint8_t free_bit_position = __builtin_ctz(~bitmap[current_entry]);
+      uint32_t alloc_mask = 1U << free_bit_position;
+      bitmap[current_entry] |= alloc_mask;
+
+      uint32_t page_frame_no = current_entry * 32 + free_bit_position;
+      search_start = current_entry;
+
+      return page_frame_no;
+    }
+    current_entry++;
+  }
+  return 0;
+};
+uint8_t pmm_free(uint32_t page_frame) {
+  if (page_frame >= bitmapLength * 32)
+    return 1;
+
+  uint32_t bitmap_X;
+  uint32_t bitmap_Y;
+
+  page_to_bitmap(page_frame, &bitmap_Y, &bitmap_X);
+
+  uint32_t free_mask = ~(1U << bitmap_X);
+  bitmap[bitmap_Y] &= free_mask;
+  search_start = bitmap_Y;
+
+  return 0;
+
+  // uint32_t current_entry = search_start;
+  // uint32_t page_frame_no = 0;
+  //
+  // for (uint32_t i = 0; i < bitmapLength; i++) {
+  //   if (current_entry >= bitmapLength) {
+  //     current_entry = 0;
+  //   }
+  //   if (bitmap[current_entry] != UINT32_MAX) {
+  //     uint8_t free_pf_position = __builtin_ctz(~bitmap[current_entry]);
+  //     page_frame_no = current_entry * 32 + free_pf_position;
+  //   }
+  //   current_entry++;
+  // }
+  //
+  // search_start = current_entry;
+  //
+  // return page_frame_no;
 };
 
 void pmm_alloc_many(uint64_t addr, uint64_t len_in_bytes) {
@@ -136,8 +184,14 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
 
   if (isOverflow) {
     uint32_t bitmap_operand = (1U << bitmap_X) - 1;
+
+    printf("\n sinside isoverflow %d %d", bitmap_X, bitmap_operand);
+
+    printf("\n sinside bitmap_Y: %x y: %d", bitmap[bitmap_Y], bitmap_Y);
     bitmap[bitmap_Y] = bitmap[bitmap_Y] & bitmap_operand;
+    printf("\n sinside bitmap_Y %x", bitmap[bitmap_Y]);
     remaining_pages -= usable_frames;
+
   } else {
     uint32_t bitmap_operand =
         ((1U << bitmap_X) - 1) | (UINT32_MAX << (bitmap_X + remaining_pages));
@@ -147,6 +201,8 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
 
   uint32_t current_Y = bitmap_Y + 1;
   while (remaining_pages > 0) {
+
+    printf("\n sinside loop");
     if (remaining_pages >= 32) {
       bitmap[current_Y] = 0;
       remaining_pages -= 32;
@@ -157,44 +213,52 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
       remaining_pages = 0;
     }
   }
+  printf("\n sinside pmm_free_many");
 };
 
 void pmm_init() {
-  MemoryMapEntry *highestEntry = &memoryMap->entry[0];
+  MemoryMapEntry *highestUsableEntry = &memoryMap->entry[0];
 
   for (uint32_t i = 0; i < memoryMap->length; i++) {
     MemoryMapEntry *Entry = &memoryMap->entry[i];
-    if (Entry->BaseAddr > highestEntry->BaseAddr) {
-      highestEntry = Entry;
+    if (Entry->BaseAddr > highestUsableEntry->BaseAddr && Entry->Type == 1) {
+      highestUsableEntry = Entry;
     }
   }
-  uint64_t totalMemory = highestEntry->BaseAddr + highestEntry->Length;
+
+  uint64_t totalMemory =
+      highestUsableEntry->BaseAddr + highestUsableEntry->Length;
   uint32_t totalPages = totalMemory / PAGE_SIZE;
 
   // todo: handle the case when remainder remains.
-  uint32_t bitmapLength = totalPages / BITMAP_WIDTH;
+  bitmapLength = totalPages / BITMAP_WIDTH;
 
   uint32_t bitmap_size = bitmapLength * 4; // each entry is 4 bytes / 32 bits
 
   // Mark all frames as used
   for (uint32_t i = 0; i < bitmapLength; i++) {
-    //
     bitmap[i] = UINT32_MAX;
   }
 
-  // Unmark the frames above 1MB based on E820
+  // Free the frames above 1MB based on E820
   for (uint32_t i = 0; i < memoryMap->length; i++) {
     MemoryMapEntry *Entry = &memoryMap->entry[i];
+    printf("\n sinside unmarking baseaddr: %lld", Entry->BaseAddr);
     if (Entry->Type == USABLE && Entry->BaseAddr >= KERNEL_START) {
       pmm_free_many(Entry->BaseAddr, Entry->Length);
     }
   }
+  breakpoint();
 
   // Mark the pages used by Kernel as reserved
   uint32_t kernel_to_bitmap_length =
       (uint64_t)&kernel_end + bitmap_size - KERNEL_START;
+
   pmm_alloc_many(KERNEL_START, kernel_to_bitmap_length);
 
+  breakpoint();
+
+  printf("\n bitmapLength %d", bitmapLength);
   printf("\n kend  + bitmap len: %lld",
          0x100000 - ((uint64_t)&kernel_end + bitmap_size));
   printf(

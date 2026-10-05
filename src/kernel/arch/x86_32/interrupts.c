@@ -132,7 +132,7 @@ void NonMaskableInterrupt(uint32_t errorAddr, uint32_t segmentSelector,
       segmentSelector, errorAddr, 0);
 
   // break to view the err addr before crashing
-  breakpoint();
+  // breakpoint();
 }
 
 // isr4
