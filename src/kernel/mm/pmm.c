@@ -248,15 +248,12 @@ void pmm_init() {
       pmm_free_many(Entry->BaseAddr, Entry->Length);
     }
   }
-  breakpoint();
 
   // Mark the pages used by Kernel as reserved
   uint32_t kernel_to_bitmap_length =
       (uint64_t)&kernel_end + bitmap_size - KERNEL_START;
 
   pmm_alloc_many(KERNEL_START, kernel_to_bitmap_length);
-
-  breakpoint();
 
   printf("\n bitmapLength %d", bitmapLength);
   printf("\n kend  + bitmap len: %lld",
