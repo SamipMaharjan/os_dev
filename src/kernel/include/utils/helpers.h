@@ -1,4 +1,3 @@
-void breakpoint();
 void halt();
 void cause_divide_error();
 void cause_gpf();
@@ -22,3 +21,9 @@ void cause_cp();
 void cause_hv();
 void cause_sx();
 void cause_vc();
+static inline void breakpoint() {
+  __asm__ volatile("xchg %bx, %bx");
+  // __asm__ volatile("int3");
+  // cause_be();
+  return;
+}

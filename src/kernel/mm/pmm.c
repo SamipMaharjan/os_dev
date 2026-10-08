@@ -22,6 +22,7 @@ extern void *kernel_end;
 #define RESERVED 2
 #define MEMORY_MAP_ADDR ((MemoryMap *)0x40500)
 #define PAGE_SIZE 4096  // 4KB page frame
+#define PAGE_SHIFT 12   // For multiplication or division
 #define BITMAP_WIDTH 32 // 32-bits per bitmap entry
 #define KERNEL_START 1048576
 
@@ -38,13 +39,13 @@ void page_to_bitmap(uint32_t page, uint32_t *bitmap_Y, uint32_t *bitmap_X) {
 
 void addr_to_bitmap(uint64_t physical_addr, uint32_t *bitmap_Y,
                     uint32_t *bitmap_X) {
-  uint32_t page = physical_addr / PAGE_SIZE;
+  uint32_t page = physical_addr >> PAGE_SHIFT;
   page_to_bitmap(page, bitmap_Y, bitmap_X);
 }
 
 // need to ceil  the end result so this is used.
 uint32_t memLength_to_pgLength(uint64_t memLength) {
-  uint32_t result = memLength / PAGE_SIZE;
+  uint32_t result = memLength >> PAGE_SHIFT;
   if (memLength % PAGE_SIZE != 0) {
     return result + 1;
   }
@@ -174,7 +175,7 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
   // Not using memLength_to_pgLength as
   // the value needs to be floored when length is not
   // page aligned
-  uint32_t remaining_pages = len_in_bytes / PAGE_SIZE;
+  uint32_t remaining_pages = len_in_bytes >> PAGE_SHIFT;
 
   // usable frames for first slot as bitmap_X is dynamic
   uint8_t usable_frames = 32 - bitmap_X;
@@ -228,7 +229,7 @@ void pmm_init() {
 
   uint64_t totalMemory =
       highestUsableEntry->BaseAddr + highestUsableEntry->Length;
-  uint32_t totalPages = totalMemory / PAGE_SIZE;
+  uint32_t totalPages = totalMemory >> PAGE_SHIFT;
 
   // todo: handle the case when remainder remains.
   bitmapLength = totalPages / BITMAP_WIDTH;
