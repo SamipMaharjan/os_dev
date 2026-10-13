@@ -36,3 +36,4 @@
   ((void far *)0xFFFF0010) // results to 0x00100000
                            // or 1048576 in decimal
                            // its the 1MB mark
+#define MEMORY_KERNEL_STACK 0x90000

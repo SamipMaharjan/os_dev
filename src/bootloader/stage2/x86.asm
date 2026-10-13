@@ -19,6 +19,7 @@
 %define ENDL 0x0D, 0x0A ; Hex for  \r \n  for putting cursor in newline
 %define DATA_DESC 0x10  ; 2x8 bytes offset of GDTR
 %define CODE_DESC 0x8   ; 8 bytes offset of GDTR
+%define MEMORY_KERNEL_STACK 0x90000
 
 bits 16
 
@@ -458,7 +459,7 @@ _x86_Enable_Pmode:
    mov ds, ax
    mov es, ax
    mov ss, ax
-   mov esp, 0x90000
+   mov esp, MEMORY_KERNEL_STACK
 
   ; pushing segment selector and dynamic entry_addr to stack 
   ; This is the best way to jump to a dynamic addr for this section.

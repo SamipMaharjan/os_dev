@@ -1,7 +1,10 @@
+#include "constants.h"
+#include "mm/utils.h"
 #include "stdio.h"
 #include "utils/helpers.h"
 #include <stdbool.h>
 #include <stdint.h>
+// #include <string.h>
 
 typedef struct {
   uint64_t BaseAddr;
@@ -18,13 +21,13 @@ typedef struct {
 // uint32_t *bitmap;
 extern void *kernel_end;
 
-#define USABLE 1
-#define RESERVED 2
-#define MEMORY_MAP_ADDR ((MemoryMap *)0x40500)
-#define PAGE_SIZE 4096  // 4KB page frame
-#define PAGE_SHIFT 12   // For multiplication or division
-#define BITMAP_WIDTH 32 // 32-bits per bitmap entry
-#define KERNEL_START 1048576
+// #define USABLE 1
+// #define RESERVED 2
+// #define MEMORY_MAP_ADDR ((MemoryMap *)0x40500)
+// #define PAGE_SIZE 4096  // 4KB page frame
+// #define PAGE_SHIFT 12   // For multiplication or division
+// #define BITMAP_WIDTH 32 // 32-bits per bitmap entry
+// #define KERNEL_START 1048576
 
 uint32_t search_start = 0;
 uint32_t bitmapLength;
@@ -44,13 +47,13 @@ void addr_to_bitmap(uint64_t physical_addr, uint32_t *bitmap_Y,
 }
 
 // need to ceil  the end result so this is used.
-uint32_t memLength_to_pgLength(uint64_t memLength) {
-  uint32_t result = memLength >> PAGE_SHIFT;
-  if (memLength % PAGE_SIZE != 0) {
-    return result + 1;
-  }
-  return result;
-}
+// uint32_t memLength_to_pgLength(uint64_t memLength) {
+//   uint32_t result = memLength >> PAGE_SHIFT;
+//   if (memLength % PAGE_SIZE != 0) {
+//     return result + 1;
+//   }
+//   return result;
+// }
 
 void print_memory_map() {
   printf("\nAccessing memory mapp");
@@ -186,11 +189,11 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
   if (isOverflow) {
     uint32_t bitmap_operand = (1U << bitmap_X) - 1;
 
-    printf("\n sinside isoverflow %d %d", bitmap_X, bitmap_operand);
+    // printf("\n sinside isoverflow %d %d", bitmap_X, bitmap_operand);
 
-    printf("\n sinside bitmap_Y: %x y: %d", bitmap[bitmap_Y], bitmap_Y);
+    // printf("\n sinside bitmap_Y: %x y: %d", bitmap[bitmap_Y], bitmap_Y);
     bitmap[bitmap_Y] = bitmap[bitmap_Y] & bitmap_operand;
-    printf("\n sinside bitmap_Y %x", bitmap[bitmap_Y]);
+    // printf("\n sinside bitmap_Y %x", bitmap[bitmap_Y]);
     remaining_pages -= usable_frames;
 
   } else {
@@ -203,7 +206,7 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
   uint32_t current_Y = bitmap_Y + 1;
   while (remaining_pages > 0) {
 
-    printf("\n sinside loop");
+    // printf("\n sinside loop");
     if (remaining_pages >= 32) {
       bitmap[current_Y] = 0;
       remaining_pages -= 32;
@@ -214,8 +217,10 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
       remaining_pages = 0;
     }
   }
-  printf("\n sinside pmm_free_many");
+  // printf("\n sinside pmm_free_many");
 };
+
+uint64_t pmm_kend_addr() { return (uint32_t)&kernel_end + bitmapLength * 4; }
 
 void pmm_init() {
   MemoryMapEntry *highestUsableEntry = &memoryMap->entry[0];
@@ -229,10 +234,14 @@ void pmm_init() {
 
   uint64_t totalMemory =
       highestUsableEntry->BaseAddr + highestUsableEntry->Length;
+  printf("\ntotalMemory::: %d", totalMemory);
+
   uint32_t totalPages = totalMemory >> PAGE_SHIFT;
 
+  printf("\ntotalPages::: %d", totalPages);
   // todo: handle the case when remainder remains.
   bitmapLength = totalPages / BITMAP_WIDTH;
+  printf("\nbitmapLEnght::: %d", bitmapLength);
 
   uint32_t bitmap_size = bitmapLength * 4; // each entry is 4 bytes / 32 bits
 
@@ -244,7 +253,7 @@ void pmm_init() {
   // Free the frames above 1MB based on E820
   for (uint32_t i = 0; i < memoryMap->length; i++) {
     MemoryMapEntry *Entry = &memoryMap->entry[i];
-    printf("\n sinside unmarking baseaddr: %lld", Entry->BaseAddr);
+    // printf("\n sinside unmarking baseaddr: %lld", Entry->BaseAddr);
     if (Entry->Type == USABLE && Entry->BaseAddr >= KERNEL_START) {
       pmm_free_many(Entry->BaseAddr, Entry->Length);
     }
@@ -257,8 +266,7 @@ void pmm_init() {
   pmm_alloc_many(KERNEL_START, kernel_to_bitmap_length);
 
   printf("\n bitmapLength %d", bitmapLength);
-  printf("\n kend  + bitmap len: %lld",
-         0x100000 - ((uint64_t)&kernel_end + bitmap_size));
+  printf("\n kend  + bitmap len: %lld", ((uint64_t)&kernel_end + bitmap_size));
   printf(
       "\n test + bitmap len: %lld",
       memLength_to_pgLength(((uint64_t)&kernel_end + bitmap_size) - 0x100000));
