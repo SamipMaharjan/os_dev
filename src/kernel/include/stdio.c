@@ -225,6 +225,13 @@ void printf(const char *fmt, ...) {
         argp = printf_number(argp, length, sign, radix);
         break;
 
+      // Print binary
+      case 'b':
+        radix = 2;
+        sign = false;
+        argp = printf_number(argp, length, sign, radix);
+        break;
+
         // ignore invalid spec
       default:
         break;

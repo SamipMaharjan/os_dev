@@ -17,7 +17,7 @@ void kernel_main(void) {
   // breakpoint();
   // pmm_free(page_frame);
   // breakpoint();
-  print_memory_map();
+  // print_memory_map();
 
   // printf("Hello world from stdio with numbers %d \n", 14);
   // printf("Hello world from stdio with string %s \n", "the string");

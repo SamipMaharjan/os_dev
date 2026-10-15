@@ -266,7 +266,7 @@ void pmm_init() {
   pmm_alloc_many(KERNEL_START, kernel_to_bitmap_length);
 
   printf("\n bitmapLength %d", bitmapLength);
-  printf("\n kend  + bitmap len: %lld", ((uint64_t)&kernel_end + bitmap_size));
+  printf("\n kend + bitmap len: %lld", ((uint64_t)&kernel_end + bitmap_size));
   printf(
       "\n test + bitmap len: %lld",
       memLength_to_pgLength(((uint64_t)&kernel_end + bitmap_size) - 0x100000));

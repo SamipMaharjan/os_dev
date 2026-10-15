@@ -29,7 +29,7 @@ typedef uint32_t PageDirectoryEntry;
 typedef uint32_t PageTableEntry;
 
 PageDirectoryEntry *page_dir;
-PageTableEntry *page_table;
+// PageTableEntry *page_table;
 
 // TODO: consider changed for the higher half styled kernel
 void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
@@ -70,6 +70,39 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
     pt_entry = 0;
   }
 }
+void vmm_print_pdt() {
+  for (uint16_t i = 0; i < MAX_ENTRIES; i++) {
+    printf("\n***************************");
+    printf("\nPRINT PDT");
+    if (page_dir[i] == 0)
+      continue;
+    printf("\n***************************");
+    printf("\nEntry no: %d", i);
+    printf("\nPage Table Addr: %x", page_dir[i] & 0xFFFFF000);
+    printf("\nEntry Flags: %b", page_dir[i] & 0xFFF);
+  }
+}
+void vmm_print_pte() {
+  printf("\n***************************");
+  printf("\nPRINT PTE");
+  for (uint16_t i = 0; i < MAX_ENTRIES; i++) {
+    if (page_dir[i] == 0)
+      continue;
+    printf("\n***************************");
+    printf("\nPDT Entry no: %d", i);
+
+    PageTableEntry *page_table = (PageTableEntry *)(page_dir[i] & 0xFFFFF000);
+    for (uint16_t j = 0; j < MAX_ENTRIES; j++) {
+      if (page_table[j] == 0)
+        continue;
+      printf("\n***************************");
+      printf("\nPage Table Entry no: %d", j);
+      printf("\n Physical Page Addr: %x", page_table[j] & 0xFFFFF000);
+      printf("\nEntry Flags: %b", page_table[j] & 0xFFF);
+    }
+  }
+}
+
 void vmm_init() {
   uint32_t kernel_pdt_pf = pmm_alloc();
   page_dir = (PageDirectoryEntry *)pf_to_paddr(kernel_pdt_pf);
@@ -80,6 +113,7 @@ void vmm_init() {
   uint32_t no_of_pages = memLength_to_pgLength(kend_addr);
   printf("no of pages: %d", no_of_pages);
   vmm_map_pages(0, 0, no_of_pages);
+  vmm_print_pte();
 
   // page_dir[pd_index] = page_table_paddr | PDE_PRESENT | PDE_WRITABLE;
   //
