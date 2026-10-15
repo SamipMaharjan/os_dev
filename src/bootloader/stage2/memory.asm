@@ -52,7 +52,6 @@ _x86_Map_Memory:
   jnz .loop
 
 .end: 
-xchg bx, bx
   call .set_length_on_buffer
   popa
   sti

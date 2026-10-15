@@ -1,3 +1,4 @@
+#include "arch.h"
 #include "constants.h"
 #include "mm/pmm.h"
 #include "stdio.h"
@@ -24,7 +25,6 @@
 //
 // #define MAX_ENTRIES 1024
 
-uint32_t *kernel_pdt;
 typedef uint32_t PageDirectoryEntry;
 typedef uint32_t PageTableEntry;
 
@@ -90,7 +90,6 @@ void vmm_print_pte() {
       continue;
     printf("\n***************************");
     printf("\nPDT Entry no: %d", i);
-
     PageTableEntry *page_table = (PageTableEntry *)(page_dir[i] & 0xFFFFF000);
     for (uint16_t j = 0; j < MAX_ENTRIES; j++) {
       if (page_table[j] == 0)
@@ -109,11 +108,13 @@ void vmm_init() {
   memset(page_dir, 0, PAGE_SIZE);
 
   uint64_t kend_addr = pmm_kend_addr();
-  printf("kend addr: %d", kend_addr);
+  // printf("kend addr: %d", kend_addr);
   uint32_t no_of_pages = memLength_to_pgLength(kend_addr);
-  printf("no of pages: %d", no_of_pages);
+  // printf("no of pages: %d", no_of_pages);
   vmm_map_pages(0, 0, no_of_pages);
-  vmm_print_pte();
+  // vmm_print_pte();
+  printf("\nPage Dir addr %x", page_dir);
+  enable_paging((uint32_t)page_dir);
 
   // page_dir[pd_index] = page_table_paddr | PDE_PRESENT | PDE_WRITABLE;
   //
