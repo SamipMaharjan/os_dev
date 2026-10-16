@@ -3,18 +3,21 @@ A hobby x86 operating system written from scratch in **C and x86 Assembly**, foc
 ### Current Progress
 
 * BIOS/FAT12 bootloader
+* WCC cross compiler setup
 * A20 line and GDT setup
-* 32-bit protected mode
+* Transition to 32-bit protected mode
 * ELF kernel loading
 * `i686-elf` cross-compiler
-* VGA and serial debugging
-* CPU exception handling
-* Physical memory management in progress
+* VGA and serial port debugging setup
+* CPU exception handling for all major faults
+* Handling keyboard and timer interrupts
+* Physical memory management using bitmap alloation technique
+* Virtual memory management and paging
+* Higher Half Kernel on progress
 
 ### Build 
 
 Requires:
-
 * NASM
 * wcc (Real Mode cross compiler) 
 * `i686-elf-gcc` (Protected Mode cross compiler)
@@ -22,7 +25,6 @@ Requires:
 
 
 ### Resources
-
 * [OSDev Wiki](https://wiki.osdev.org/)
 * [BrokenThorn OS Development](http://www.brokenthorn.com/Resources/OSDevIndex.html)
 * [Nanobyte OS Development Tutorials](https://www.youtube.com/@nanobyte)

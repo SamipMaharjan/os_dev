@@ -220,7 +220,20 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
   // printf("\n sinside pmm_free_many");
 };
 
-uint64_t pmm_kend_addr() { return (uint32_t)&kernel_end + bitmapLength * 4; }
+uint64_t pmm_kend_addr() {
+  uint32_t final_used_pf_Y = 0;
+  for (uint32_t i = 0; i < bitmapLength; i++) {
+    // get the last row that has a used page
+    if (bitmap[i] != 0) {
+      final_used_pf_Y = i;
+    }
+  }
+  uint32_t final_used_pf_X = __builtin_ctz(~bitmap[final_used_pf_Y]) - 1;
+  uint32_t pf_no = final_used_pf_Y * BITMAP_WIDTH + final_used_pf_X;
+  uint32_t kend_addr = pf_no * PAGE_SIZE;
+
+  return kend_addr;
+}
 
 void pmm_init() {
   MemoryMapEntry *highestUsableEntry = &memoryMap->entry[0];

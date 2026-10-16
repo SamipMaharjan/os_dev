@@ -24,3 +24,5 @@
 #define PTE_PAT (1 << 7)
 
 #define MAX_ENTRIES 1024
+#define ONE_GIB 0x40000000
+#define HIGHER_HALF 0xC0000000

@@ -1,2 +1,3 @@
 target remote localhost:1234
 break breakpoint
+set confirm off

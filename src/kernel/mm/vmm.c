@@ -4,26 +4,8 @@
 #include "stdio.h"
 #include "string.h"
 #include "utils.h"
+#include "utils/helpers.h"
 #include <stdint.h>
-
-// #define PDE_PRESENT (1 << 0)
-// #define PDE_WRITABLE (1 << 1)
-// #define PDE_USER (1 << 2)
-// #define PDE_ACCESSED (1 << 5)
-// #define PDE_PAGE_SIZE (1 << 7)
-//
-// #define PAGE_SIZE 4096
-//
-// #define PTE_PRESENT (1 << 0)
-// #define PTE_WRITABLE (1 << 1)
-// #define PTE_USER (1 << 2)
-// #define PTE_WRITE_THROUGH (1 << 3)
-// #define PTE_CACHE_DISABLE (1 << 4)
-// #define PTE_ACCESSED (1 << 5)
-// #define PTE_DIRTY (1 << 6)
-// #define PTE_PAT (1 << 7)
-//
-// #define MAX_ENTRIES 1024
 
 typedef uint32_t PageDirectoryEntry;
 typedef uint32_t PageTableEntry;
@@ -42,6 +24,7 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
 
   while (remaining_pages && pdt_entry < MAX_ENTRIES) {
     PageTableEntry *page_table;
+    // if old pte already exists
     if (page_dir[pdt_entry] & PDE_PRESENT) {
       page_table = (PageTableEntry *)(page_dir[pdt_entry] & 0xFFFFF000);
     } else {
@@ -72,19 +55,15 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
 }
 void vmm_print_pdt() {
   for (uint16_t i = 0; i < MAX_ENTRIES; i++) {
-    printf("\n***************************");
-    printf("\nPRINT PDT");
     if (page_dir[i] == 0)
       continue;
     printf("\n***************************");
-    printf("\nEntry no: %d", i);
+    printf("\nPDT Entry no: %d", i);
     printf("\nPage Table Addr: %x", page_dir[i] & 0xFFFFF000);
     printf("\nEntry Flags: %b", page_dir[i] & 0xFFF);
   }
 }
 void vmm_print_pte() {
-  printf("\n***************************");
-  printf("\nPRINT PTE");
   for (uint16_t i = 0; i < MAX_ENTRIES; i++) {
     if (page_dir[i] == 0)
       continue;
@@ -103,18 +82,34 @@ void vmm_print_pte() {
 }
 
 void vmm_init() {
+  printf("\n111kend addr: %d", kend_addr);
+
   uint32_t kernel_pdt_pf = pmm_alloc();
   page_dir = (PageDirectoryEntry *)pf_to_paddr(kernel_pdt_pf);
   memset(page_dir, 0, PAGE_SIZE);
 
   uint64_t kend_addr = pmm_kend_addr();
-  // printf("kend addr: %d", kend_addr);
+  // add 1 more page for PTE
+  printf("\n222kend addr: %d", kend_addr + 1 * PAGE_SIZE);
   uint32_t no_of_pages = memLength_to_pgLength(kend_addr);
   // printf("no of pages: %d", no_of_pages);
   vmm_map_pages(0, 0, no_of_pages);
   // vmm_print_pte();
   printf("\nPage Dir addr %x", page_dir);
   enable_paging((uint32_t)page_dir);
+  // no error
+  // printf("\nafter paging %x", page_dir);
+  // // double fault
+  // printf("\nafter paging %x", page_dir[0]);
+  // *page_dir = 0;
+  // vmm_print_pdt();
+
+  // breakpoint();
+  // // higher-half mapping
+  // no_of_pages = memLength_to_pgLength(ONE_GIB);
+  // vmm_map_pages(HIGHER_HALF, 0, no_of_pages);
+  // vmm_print_pdt();
+  // breakpoint();
 
   // page_dir[pd_index] = page_table_paddr | PDE_PRESENT | PDE_WRITABLE;
   //
