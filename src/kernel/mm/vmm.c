@@ -22,23 +22,26 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
   uint16_t pdt_entry = v_addr >> 22;
   uint16_t pt_entry = (v_addr >> 12) & 0b1111111111;
 
+  // maps pdt
+  // maybe maps 1 extra?
   while (remaining_pages && pdt_entry < MAX_ENTRIES) {
     PageTableEntry *page_table;
     // if old pte already exists
     if (page_dir[pdt_entry] & PDE_PRESENT) {
-      page_table = (PageTableEntry *)(page_dir[pdt_entry] & 0xFFFFF000);
+      page_table = (PageDirectoryEntry *)(page_dir[pdt_entry] & 0xFFFFF000);
     } else {
       // Allocate physcal memory for Page Table from PMM
       uint32_t kernel_pte_pf = pmm_alloc();
-      // j
-      page_table = (PageTableEntry *)pf_to_paddr(kernel_pte_pf);
-      // j
+      page_table = (PageDirectoryEntry *)pf_to_paddr(kernel_pte_pf);
       memset(page_table, 0, PAGE_SIZE);
       // Raise present and wriatble bits of PDT entry
       page_dir[pdt_entry] = (uint32_t)page_table | PDE_PRESENT | PDE_WRITABLE;
+
+      // this will only work for identity mapping so its temp fix
+      // vmm_map_pages((uint32_t)page_table, (uint32_t)page_table, 1);
     }
 
-    // mapping page_table
+    // maps pte
     while (remaining_pages && pt_entry < MAX_ENTRIES) {
       page_table[pt_entry] = p_addr | PTE_PRESENT | PTE_WRITABLE;
       remaining_pages--;
@@ -82,21 +85,31 @@ void vmm_print_pte() {
 }
 
 void vmm_init() {
-  printf("\n111kend addr: %d", kend_addr);
-
   uint32_t kernel_pdt_pf = pmm_alloc();
   page_dir = (PageDirectoryEntry *)pf_to_paddr(kernel_pdt_pf);
   memset(page_dir, 0, PAGE_SIZE);
 
-  uint64_t kend_addr = pmm_kend_addr();
-  // add 1 more page for PTE
-  printf("\n222kend addr: %d", kend_addr + 1 * PAGE_SIZE);
-  uint32_t no_of_pages = memLength_to_pgLength(kend_addr);
-  // printf("no of pages: %d", no_of_pages);
+  uint64_t final_used_pf = pmm_final_used_pf();
+  // Add pages of PDT and PT0;
+  uint32_t no_of_pages = final_used_pf + 2;
+  printf("\n final_used_pf: %x", final_used_pf);
+  printf("\n no of pages to map 0 to %llx:  %x", final_used_pf, no_of_pages);
+  // printf("\n no of pages : %x", no_of_pages);
+
+  // identity mapping
   vmm_map_pages(0, 0, no_of_pages);
+
   // vmm_print_pte();
-  printf("\nPage Dir addr %x", page_dir);
   enable_paging((uint32_t)page_dir);
+  printf("\nPage Dir addr %x", page_dir);
+  printf("\nPage Table addr %x", page_dir[0] & 0xFFFFF000);
+  PageTableEntry *pte = (PageTableEntry *)(page_dir[0] & 0xFFFFF000);
+  printf("\nPage Table entry %x", pte[0]);
+  // pte[0] = 12;
+  // printf("\nPage Table entry %x", pte[0]);
+
+  // vmm_print_pdt();
+  vmm_print_pte();
   // no error
   // printf("\nafter paging %x", page_dir);
   // // double fault

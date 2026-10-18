@@ -220,7 +220,7 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
   // printf("\n sinside pmm_free_many");
 };
 
-uint64_t pmm_kend_addr() {
+uint64_t pmm_final_used_pf() {
   uint32_t final_used_pf_Y = 0;
   for (uint32_t i = 0; i < bitmapLength; i++) {
     // get the last row that has a used page
@@ -230,9 +230,9 @@ uint64_t pmm_kend_addr() {
   }
   uint32_t final_used_pf_X = __builtin_ctz(~bitmap[final_used_pf_Y]) - 1;
   uint32_t pf_no = final_used_pf_Y * BITMAP_WIDTH + final_used_pf_X;
-  uint32_t kend_addr = pf_no * PAGE_SIZE;
+  // uint32_t kend_addr = pf_no * PAGE_SIZE;
 
-  return kend_addr;
+  return pf_no;
 }
 
 void pmm_init() {
@@ -278,11 +278,16 @@ void pmm_init() {
 
   pmm_alloc_many(KERNEL_START, kernel_to_bitmap_length);
 
-  printf("\n bitmapLength %d", bitmapLength);
-  printf("\n kend + bitmap len: %lld", ((uint64_t)&kernel_end + bitmap_size));
-  printf(
-      "\n test + bitmap len: %lld",
-      memLength_to_pgLength(((uint64_t)&kernel_end + bitmap_size) - 0x100000));
+  printf("\n bitmapLength %x", bitmapLength);
+  printf("\n kend %x", &kernel_end);
+  printf("\n bitmap size %x", bitmap_size);
+  printf("\n kend + bitmap : %llx", ((uint64_t)&kernel_end + bitmap_size));
+  printf("\n kstart to bitmap end : %llx",
+         ((uint64_t)&kernel_end + bitmap_size) - KERNEL_START);
+  // printf(
+  //     "\n test + bitmap len: %lld",
+  //     memLength_to_pgLength(((uint64_t)&kernel_end + bitmap_size) -
+  //     0x100000));
 
   return;
 }
