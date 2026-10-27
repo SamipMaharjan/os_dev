@@ -79,7 +79,8 @@ void vmm_print_pte() {
       printf("\n***************************");
       printf("\nPage Table Entry no: %d", j);
       printf("\n Physical Page Addr: %x", page_table[j] & 0xFFFFF000);
-      printf("\nEntry Flags: %b", page_table[j] & 0xFFF);
+      printf("\n Physical Page Addr: %x", page_table[j] & 0xFFFFF000);
+      printf("\nEntry 00Flags: %b", page_table[j] & 0xFFF);
     }
   }
 }
@@ -89,27 +90,20 @@ void vmm_init() {
   page_dir = (PageDirectoryEntry *)pf_to_paddr(kernel_pdt_pf);
   memset(page_dir, 0, PAGE_SIZE);
 
-  uint64_t final_used_pf = pmm_final_used_pf();
-  // Add pages of PDT and PT0;
-  uint32_t no_of_pages = final_used_pf + 2;
-  printf("\n final_used_pf: %x", final_used_pf);
-  printf("\n no of pages to map 0 to %llx:  %x", final_used_pf, no_of_pages);
-  // printf("\n no of pages : %x", no_of_pages);
+  uint64_t final_usable_pf = pmm_final_usable_pf();
+  uint32_t no_of_pages = final_usable_pf;
 
-  // identity mapping
+  // printf("\nfinal usable pf %d ", no_of_pages);
+
+  // identity mapping entire 128MiB region
   vmm_map_pages(0, 0, no_of_pages);
-
   // vmm_print_pte();
   enable_paging((uint32_t)page_dir);
   printf("\nPage Dir addr %x", page_dir);
   printf("\nPage Table addr %x", page_dir[0] & 0xFFFFF000);
   PageTableEntry *pte = (PageTableEntry *)(page_dir[0] & 0xFFFFF000);
   printf("\nPage Table entry %x", pte[0]);
-  // pte[0] = 12;
-  // printf("\nPage Table entry %x", pte[0]);
 
-  // vmm_print_pdt();
-  vmm_print_pte();
   // no error
   // printf("\nafter paging %x", page_dir);
   // // double fault

@@ -220,6 +220,9 @@ void pmm_free_many(uint64_t addr, uint64_t len_in_bytes) {
   // printf("\n sinside pmm_free_many");
 };
 
+uint64_t pmm_final_usable_pf() {
+  return bitmapLength * BITMAP_WIDTH + BITMAP_WIDTH;
+}
 uint64_t pmm_final_used_pf() {
   uint32_t final_used_pf_Y = 0;
   for (uint32_t i = 0; i < bitmapLength; i++) {
@@ -247,6 +250,7 @@ void pmm_init() {
 
   uint64_t totalMemory =
       highestUsableEntry->BaseAddr + highestUsableEntry->Length;
+
   printf("\ntotalMemory::: %d", totalMemory);
 
   uint32_t totalPages = totalMemory >> PAGE_SHIFT;

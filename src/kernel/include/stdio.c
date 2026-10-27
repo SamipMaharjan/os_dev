@@ -19,7 +19,7 @@ const char g_HexChars[] = "0123456789abcdef";
 
 void putc(char c) {
   serial_putchar(c);
-  terminal_putchar(c);
+  // terminal_putchar(c);
 }
 
 void puts(const char *str) {
