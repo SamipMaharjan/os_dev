@@ -7,13 +7,13 @@
 #include <stdint.h>
 
 void kernel_main(void) {
-  for (uint32_t i = 0; i < UINT32_MAX; i++) {
-    printf("1\n");
-  }
+  // for (uint32_t i = 0; i < UINT32_MAX; i++) {
+  //   printf("1\n");
+  // }
   // have to get the memory mappings from the stage2's buffer address.
-  // arch_init();
-  // pmm_init();
-  // vmm_init();
+  arch_init();
+  pmm_init();
+  vmm_init();
 
   // uint32_t page_frame = pmm_alloc();
   // printf("\n page frame %x", page_frame);
