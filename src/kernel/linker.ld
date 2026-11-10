@@ -1,6 +1,9 @@
 /* The bootloader will look at this image and start execution at the symbol
-   designated as the entry point. */
+   designated as the entry point.  */ 
 ENTRY(start)
+
+KERNEL_VMA = 0xC0000000;
+KERNEL_LMA = 0x00100000;
 
 /* Tell where the various sections of the object files will be put in the final
    kernel image. */
@@ -18,14 +21,30 @@ SECTIONS
 	   work around this issue. This does not use that feature, so 2M was
 	   chosen as a safer option than the traditional 1M. But I will use 1M as 
      i am using BIOS*/
-	. = 1M;
+	. = KERNEL_LMA; 
 
+  .bootstrap.text ALIGN(4K) :
+  {
+      *(.bootstrap.text)
+  }
+
+  .bootstrap.data ALIGN(4K) :
+  {
+      *(.bootstrap.data)
+  }
+
+  .bootstrap.bss ALIGN(4K) :
+  {
+      *(COMMON)
+      *(.bootstrap.bss)
+  }
+   
+  . += KERNEL_VMA;
 	/* First put the multiboot header, as it is required to be put very early
 	   in the image or the bootloader won't recognize the file format.
 	   Next we'll put the .text section. */
-	.text BLOCK(4K) : ALIGN(4K)
+	.text BLOCK(4K) : ALIGN(4K) 
 	{
-		*(.multiboot)
 		*(.text)
 	}
 

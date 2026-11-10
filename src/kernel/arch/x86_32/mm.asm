@@ -1,6 +1,5 @@
 global enable_paging
 enable_paging: 
-xchg bx, bx
   ; setting new call frame
   push ebp
   mov ebp, esp
@@ -18,5 +17,23 @@ xchg bx, bx
 
   ; setting back the call frame and register values
   popad
+  ; mov esp, ebp
   pop ebp
   ret
+
+global transition_higherhalf
+transition_higherhalf:
+  push ebp
+  mov ebp, esp
+  ; pushad
+  mov eax, [ebp+8] ; access the higher half addr 
+
+  ; resetting the call frame
+  mov esp, ebp
+  pop ebp
+  jmp eax
+
+  ; should never happen
+  hlt
+
+  
