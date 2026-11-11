@@ -1,16 +1,18 @@
 ; org 0x100000
 bits 32
 extern kernel_main
+section .bootstrap.text
 global start
 start: 
-  call kernel_main
+  xchg bx, bx
+  ; call kernel_main
 
-  ; call ClrScreen32
-  ; mov ebx, print_msg
-  ;
-  ; mov [_CurrX], 19
-  ; mov [_CurrY], 11
-  ; call Puts32
+  call ClrScreen32
+  mov ebx, print_msg
+
+  mov [_CurrX], 19
+  mov [_CurrY], 11
+  call Puts32
 
   cli 
   hlt
@@ -35,7 +37,7 @@ Putch32:
   mov edi, VIDMEM
 
   xor eax, eax
-  
+
 ; Getting the current position in the memory of current x/y coordinates
 ; since address space is linear we must use the following formula to convert the x/y coordinates of screen to 
 ; exact byte position in memory
@@ -62,7 +64,7 @@ Putch32:
   mov dl, bl
   mov dh, CHAR_ATTRIBUTE
   mov [edi], dx
-  
+
 ; update cursor position
   inc byte  [_CurrX]
   cmp [_CurrX], Cols
@@ -100,7 +102,7 @@ Puts32:
 
   call Putch32
   ; update current character pointer or bl register
-  
+
 ; restart loop
 .Next: 
   inc edi
@@ -139,7 +141,7 @@ MoveCursor:
   ; And in the instruction register:
   ; 0x0E :- indicates the upper byte of cursor position
   ; 0x0F :- indicates the lower byte of cursor position
-  
+
   ; I/O write to instruction register of VGA.
   ; Indicates Data reg will have lower byte of cursor position.
   mov dx, 0x3D4
@@ -186,14 +188,14 @@ ClrScreen32:
   call MoveCursor
 
 
-  
+
 
   popa 
   ret
 
-   
 
-  
+
+
 
 
 print_msg db 'Hello World From Protected Mode and VGA', 0;

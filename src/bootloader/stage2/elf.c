@@ -56,18 +56,19 @@ void ELF_Load(uint8_t *elfHeaders, FAT_File far *file, DISK *disk,
     // Memory allocated for the segment
     uint32_t memSize = ProgramHeader->memSize;
     uint32_t fileOffset = ProgramHeader->fileOffset;
-    void far *virtualAddr = LinearToFar(ProgramHeader->virtualAddr);
+    // void far *virtualAddr = LinearToFar(ProgramHeader->virtualAddr);
+    void far *physicalAddr = LinearToFar(ProgramHeader->physicalAddr);
 
     printf(
-        "\r\nKernel.elf debug size: %lx, pos: %lx, off: %lx, virtualAddr: %lx",
-        fileSize, file->Position, fileOffset, virtualAddr);
+        "\r\nKernel.elf debug size: %lx, pos: %lx, off: %lx, physicalAddr: %lx",
+        fileSize, file->Position, fileOffset, physicalAddr);
 
     // printf("\r\n disk file filesize outputPointer:  %x, %lx, %lx", file,
     // ProgramHeader->fileSize, outputPointer);
 
     // LOAD segment to dataOut
     uint32_t readBytes =
-        FAT_Read(disk, file, fileSize, fileOffset, virtualAddr);
+        FAT_Read(disk, file, fileSize, fileOffset, physicalAddr);
 
     printf("\r\n Read bytes: %lx ", readBytes);
   }
