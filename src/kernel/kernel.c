@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 void kernel_main(void) {
+  breakpoint();
   // for (uint32_t i = 0; i < UINT32_MAX; i++) {
   //   printf("1\n");
   // }

@@ -276,9 +276,10 @@ void pmm_init() {
     }
   }
 
-  // Mark the pages used by Kernel as reserved
+  // Mark the pages used by Kernel, PDT, and PTs as reserved
   uint32_t kernel_to_bitmap_length =
-      (uint64_t)&kernel_end + bitmap_size - KERNEL_START;
+      (uint64_t)&kernel_end + bitmap_size -
+      KERNEL_START; // need to add the end addr of initial pdt and pts
 
   pmm_alloc_many(KERNEL_START, kernel_to_bitmap_length);
 

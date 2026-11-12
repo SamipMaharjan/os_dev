@@ -5,6 +5,7 @@ ENTRY(start)
 KERNEL_VMA = 0xC0000000;
 KERNEL_LMA = 0x00100000;
 
+
 /* Tell where the various sections of the object files will be put in the final
    kernel image. */
 SECTIONS
@@ -37,7 +38,7 @@ SECTIONS
   {
       *(COMMON)
       *(.bootstrap.bss)
-  }
+  }: bootstrap_data
    
   . += KERNEL_VMA;
 	/* First put the multiboot header, as it is required to be put very early
