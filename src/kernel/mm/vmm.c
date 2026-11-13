@@ -96,6 +96,13 @@ void direct_map_C0000000() {
 // void transition_higherhalf() { printf("higher half"); }
 
 void vmm_init() {
+  breakpoint();
+
+  uint32_t CR3 = x86_get_cr3();
+  serial_print("\nCR3::%x", &CR3);
+  page_dir = (PageDirectoryEntry *)(CR3 + 0xC0000000);
+  serial_print("\nCR33::%x", &CR3);
+
   // uint32_t kernel_pdt_pf = pmm_alloc();
   // page_dir = (PageDirectoryEntry *)pf_to_paddr(kernel_pdt_pf);
   // memset(page_dir, 0, PAGE_SIZE);

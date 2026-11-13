@@ -1,25 +1,11 @@
 #include "arch/x86_32/serial_port.h"
 #include "arch/x86_32/vga.h"
+#include "printf_states.h"
 #include <stdbool.h>
-// States
-#define PRINTF_STATE_NORMAL 0
-#define PRINTF_STATE_LENGTH 1
-#define PRINTF_STATE_LENGTH_SHORT 2
-#define PRINTF_STATE_LENGTH_LONG 3
-#define PRINTF_STATE_SPEC 4
-
-// Lengths
-#define PRINTF_LENGTH_DEFAULT 0
-#define PRINTF_LENGTH_SHORT_SHORT 1
-#define PRINTF_LENGTH_SHORT 2
-#define PRINTF_LENGTH_LONG 3
-#define PRINTF_LENGTH_LONG_LONG 4
-
-const char g_HexChars[] = "0123456789abcdef";
 
 void putc(char c) {
-  serial_putchar(c);
-  // terminal_putchar(c);
+  // serial_putchar(c);
+  terminal_putchar(c);
 }
 
 void puts(const char *str) {

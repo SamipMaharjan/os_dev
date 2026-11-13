@@ -21,19 +21,13 @@ enable_paging:
   pop ebp
   ret
 
-global transition_higherhalf
-transition_higherhalf:
+; return cr3's value 
+global x86_get_cr3
+x86_get_cr3:
   push ebp
   mov ebp, esp
-  ; pushad
-  mov eax, [ebp+8] ; access the higher half addr 
 
-  ; resetting the call frame
-  mov esp, ebp
+  mov eax, cr3
+
   pop ebp
-  jmp eax
-
-  ; should never happen
-  hlt
-
-  
+  ret

@@ -53,7 +53,7 @@ size_t strlen(const char *str) {
 
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
-#define VGA_MEMORY 0xB8000
+#define VGA_MEMORY 0xC00B8000
 
 uint8_t END_KERNEL[8] =
     "ELF END"; // just for spotting end of executable in hex editors and memory
