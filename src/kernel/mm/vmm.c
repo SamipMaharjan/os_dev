@@ -21,6 +21,7 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
   uint16_t pdt_entry = v_addr >> 22;
   uint16_t pt_entry = (v_addr >> 12) & 0b1111111111;
 
+  // while(remaining_pages%1024)
   // maps pdt
   while (remaining_pages && pdt_entry < MAX_ENTRIES) {
     PageTableEntry *page_table;
@@ -32,11 +33,6 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
       uint32_t kernel_pte_pf = pmm_alloc();
       page_table = (PageDirectoryEntry *)pf_to_paddr(kernel_pte_pf);
       memset(page_table, 0, PAGE_SIZE);
-      // Raise present and wriatble bits of PDT entry
-      page_dir[pdt_entry] = (uint32_t)page_table | PDE_PRESENT | PDE_WRITABLE;
-
-      // this will only work for identity mapping so its temp fix
-      // vmm_map_pages((uint32_t)page_table, (uint32_t)page_table, 1);
     }
 
     // maps pte
@@ -47,6 +43,9 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
       p_addr += PAGE_SIZE;
     }
 
+    // Raise present and wriatble bits of PDT entry
+    page_dir[pdt_entry] = (uint32_t)page_table | PDE_PRESENT | PDE_WRITABLE;
+
     // updating the vaddr for next iter.
     // uint32_t allocated_count = MAX_ENTRIES - (v_addr >> 12);
     // v_addr += (++pdt_entry) << 22;
@@ -54,34 +53,40 @@ void vmm_map_pages(uint32_t v_addr, uint32_t p_addr, uint32_t no_of_pages) {
     pt_entry = 0;
   }
 }
+
 void vmm_print_pdt() {
   for (uint16_t i = 0; i < MAX_ENTRIES; i++) {
     if (page_dir[i] == 0)
       continue;
-    printf("\n***************************");
-    printf("\nPDT Entry no: %d", i);
-    printf("\nPage Table Addr: %x", page_dir[i] & 0xFFFFF000);
-    printf("\nEntry Flags: %b", page_dir[i] & 0xFFF);
+    serial_print("\n***************************");
+    serial_print("\nPDT Entry no: %d", i);
+    serial_print("\nPage Table Addr: %x", page_dir[i] & 0xFFFFF000);
+    serial_print("\nEntry Flags: %b", page_dir[i] & 0xFFF);
   }
 }
 void vmm_print_pte() {
   for (uint16_t i = 0; i < MAX_ENTRIES; i++) {
     if (page_dir[i] == 0)
       continue;
-    printf("\n***************************");
-    printf("\nPDT Entry no: %d", i);
+    serial_print("\n***************************");
+    serial_print("\nPDT Entry no: %d", i);
     PageTableEntry *page_table = (PageTableEntry *)(page_dir[i] & 0xFFFFF000);
     for (uint16_t j = 0; j < MAX_ENTRIES; j++) {
       if (page_table[j] == 0)
         continue;
-      printf("\n***************************");
-      printf("\nPage Table Entry no: %d", j);
-      printf("\n Physical Page Addr: %x", page_table[j] & 0xFFFFF000);
-      printf("\n Physical Page Addr: %x", page_table[j] & 0xFFFFF000);
-      printf("\nEntry 00Flags: %b", page_table[j] & 0xFFF);
+      serial_print("\n***************************");
+      serial_print("\nPage Table Entry no: %d", j);
+      serial_print("\n Physical Page Addr: %x", page_table[j] & 0xFFFFF000);
+      serial_print("\n Physical Page Addr: %x", page_table[j] & 0xFFFFF000);
+      serial_print("\nEntry 00Flags: %b", page_table[j] & 0xFFF);
     }
   }
 }
+
+// void vmm_unmap(uint32_t vaddr) {
+//   vaddr = vaddr & 0xFFFFF000;
+//   //
+// };
 
 void direct_map_C0000000() {
   uint32_t i = 0;
@@ -96,19 +101,25 @@ void direct_map_C0000000() {
 // void transition_higherhalf() { printf("higher half"); }
 
 void vmm_init() {
-  breakpoint();
-
   uint32_t CR3 = x86_get_cr3();
-  serial_print("\nCR3::%x", &CR3);
+  serial_print("\nCR3::%x", CR3);
   page_dir = (PageDirectoryEntry *)(CR3 + 0xC0000000);
-  serial_print("\nCR33::%x", &CR3);
+  serial_print("\n Page directory::%x", page_dir);
+  uint64_t final_usable_pf = pmm_final_usable_pf();
+  uint32_t no_of_pages = final_usable_pf;
+
+  serial_print("\n no_of_pages :%d", no_of_pages);
+  vmm_map_pages(0xC0000000, 0, no_of_pages);
+
+  // Removing the identity mapping.
+  page_dir[0] = 0;
+
+  vmm_print_pdt();
 
   // uint32_t kernel_pdt_pf = pmm_alloc();
   // page_dir = (PageDirectoryEntry *)pf_to_paddr(kernel_pdt_pf);
   // memset(page_dir, 0, PAGE_SIZE);
   //
-  // uint64_t final_usable_pf = pmm_final_usable_pf();
-  // uint32_t no_of_pages = final_usable_pf;
 
   // printf("\nfinal usable pf %d ", no_of_pages);
   // identity mapping entire 128MiB region
